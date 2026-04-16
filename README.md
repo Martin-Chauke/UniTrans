@@ -1,4 +1,4 @@
-# UniTrans — University Transport Management System API
+# UniTrans — API
 
 A Django REST Framework API for managing university bus transport, including student subscriptions, trip scheduling, seat assignments, incident reporting, and notifications.
 
