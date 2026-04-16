@@ -1,6 +1,7 @@
 from pathlib import Path
-from decouple import config
 from datetime import timedelta
+import dj_database_url
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -73,14 +74,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'unitrans.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='unitrans_db'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-    }
+    'default': dj_database_url.config(
+        env='DATABASE_URL',
+        default='postgresql://postgres:password@localhost:5432/unitrans_db',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 AUTH_USER_MODEL = 'accounts.User'

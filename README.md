@@ -41,7 +41,16 @@ pip install -r requirements.txt
 
 ```powershell
 copy .env.example .env
-# Edit .env with your PostgreSQL credentials and secret key
+# Edit .env — set your SECRET_KEY and DATABASE_URL
+```
+
+The `DATABASE_URL` format is:
+```
+postgresql://<user>:<password>@<host>:<port>/<dbname>
+
+# Examples:
+DATABASE_URL=postgresql://postgres:secret@localhost:5432/unitrans_db
+DATABASE_URL=postgresql://admin:pass@db.example.com:5432/unitrans_prod
 ```
 
 ### 6. Create PostgreSQL database
