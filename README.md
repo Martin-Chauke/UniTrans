@@ -53,11 +53,8 @@ DATABASE_URL=postgresql://postgres:secret@localhost:5432/unitrans_db
 DATABASE_URL=postgresql://admin:pass@db.example.com:5432/unitrans_prod
 ```
 
-### 6. Create PostgreSQL database
+### 6==5. Create PostgreSQL database
 
-```sql
-CREATE DATABASE unitrans_db;
-```
 
 ### 7. Run migrations
 

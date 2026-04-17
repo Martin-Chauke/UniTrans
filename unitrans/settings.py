@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'unitrans.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         env='DATABASE_URL',
-        default='postgresql://postgres:password@localhost:5432/unitrans_db',
+        default='postgresql://postgres:NeUrOViSion_AI@localhost:5432/unitrans_db',
         conn_max_age=600,
         conn_health_checks=True,
     )

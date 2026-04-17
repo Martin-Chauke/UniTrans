@@ -1,0 +1,4973 @@
+openapi: 3.0.3
+info:
+  title: UniTrans API
+  version: 1.0.0
+  description: University Transport Management System API. Provides endpoints for
+    student subscriptions, trip scheduling, seat assignments, incident reporting,
+    and notifications.
+paths:
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      summary: Login and obtain JWT tokens
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: ''
+        '400':
+          description: Invalid credentials
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      summary: Register a new student
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+          description: ''
+        '400':
+          description: Validation errors
+  /api/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      summary: Refresh JWT access token
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/bus-assignments/:
+    get:
+      operationId: bus_assignments_list
+      summary: List all bus assignments — includes capacity warnings
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBusAssignmentList'
+          description: ''
+    post:
+      operationId: bus_assignments_create
+      summary: Create a bus assignment (Manager only)
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusAssignment'
+          description: ''
+  /api/bus-assignments/{bus_assignment_id}/:
+    get:
+      operationId: bus_assignments_retrieve
+      summary: Retrieve a bus assignment
+      parameters:
+      - in: path
+        name: bus_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus Assignment.
+        required: true
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusAssignment'
+          description: ''
+    put:
+      operationId: bus_assignments_update
+      summary: Update a bus assignment (Manager only)
+      parameters:
+      - in: path
+        name: bus_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus Assignment.
+        required: true
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusAssignment'
+          description: ''
+    patch:
+      operationId: bus_assignments_partial_update
+      summary: Partial update a bus assignment (Manager only)
+      parameters:
+      - in: path
+        name: bus_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus Assignment.
+        required: true
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBusAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBusAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBusAssignmentRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusAssignment'
+          description: ''
+    delete:
+      operationId: bus_assignments_destroy
+      summary: Delete a bus assignment (Manager only)
+      parameters:
+      - in: path
+        name: bus_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus Assignment.
+        required: true
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/buses/:
+    get:
+      operationId: buses_list
+      summary: List all buses
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBusList'
+          description: ''
+    post:
+      operationId: buses_create
+      summary: Create a bus (Manager only)
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bus'
+          description: ''
+  /api/buses/{bus_id}/:
+    get:
+      operationId: buses_retrieve
+      summary: Retrieve a bus
+      parameters:
+      - in: path
+        name: bus_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus.
+        required: true
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bus'
+          description: ''
+    put:
+      operationId: buses_update
+      summary: Update a bus (Manager only)
+      parameters:
+      - in: path
+        name: bus_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus.
+        required: true
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bus'
+          description: ''
+    patch:
+      operationId: buses_partial_update
+      summary: Partial update a bus (Manager only)
+      parameters:
+      - in: path
+        name: bus_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus.
+        required: true
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBusRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bus'
+          description: ''
+    delete:
+      operationId: buses_destroy
+      summary: Delete a bus (Manager only)
+      parameters:
+      - in: path
+        name: bus_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus.
+        required: true
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/incidents/:
+    get:
+      operationId: incidents_list
+      summary: List all incidents (Manager only)
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - incidents
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedIncidentList'
+          description: ''
+    post:
+      operationId: incidents_create
+      summary: Report an incident (Manager only)
+      tags:
+      - incidents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+  /api/incidents/{incident_id}/:
+    get:
+      operationId: incidents_retrieve
+      summary: Retrieve an incident (Manager only)
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+    put:
+      operationId: incidents_update
+      summary: Update an incident (Manager only)
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+    patch:
+      operationId: incidents_partial_update
+      summary: Partial update an incident (Manager only)
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+    delete:
+      operationId: incidents_destroy
+      summary: Delete an incident (Manager only)
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/incidents/{incident_id}/resolve/:
+    patch:
+      operationId: incidents_resolve_partial_update
+      summary: Resolve an incident
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentResolveRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentResolveRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentResolveRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+        '404':
+          description: Incident not found
+  /api/lines/:
+    get:
+      operationId: lines_list
+      summary: List all lines
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLineList'
+          description: ''
+    post:
+      operationId: lines_create
+      summary: Create a line (Manager only)
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineWrite'
+          description: ''
+  /api/lines/{line_id}/:
+    get:
+      operationId: lines_retrieve
+      summary: Retrieve a line with stations
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+          description: ''
+    put:
+      operationId: lines_update
+      summary: Update a line (Manager only)
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineWrite'
+          description: ''
+    patch:
+      operationId: lines_partial_update
+      summary: Partial update a line (Manager only)
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLineWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLineWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLineWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineWrite'
+          description: ''
+    delete:
+      operationId: lines_destroy
+      summary: Delete a line (Manager only)
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/lines/{line_id}/timetable/:
+    get:
+      operationId: lines_timetable_retrieve
+      summary: View timetable for a line (schedules with trips)
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timetable'
+          description: ''
+  /api/manager/bus-assignments/:
+    get:
+      operationId: manager_bus_assignments_list
+      summary: List all bus assignments — includes capacity warnings
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBusAssignmentList'
+          description: ''
+    post:
+      operationId: manager_bus_assignments_create
+      summary: Create a bus assignment (Manager only)
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusAssignment'
+          description: ''
+  /api/manager/bus-assignments/{bus_assignment_id}/:
+    get:
+      operationId: manager_bus_assignments_retrieve
+      summary: Retrieve a bus assignment
+      parameters:
+      - in: path
+        name: bus_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus Assignment.
+        required: true
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusAssignment'
+          description: ''
+    put:
+      operationId: manager_bus_assignments_update
+      summary: Update a bus assignment (Manager only)
+      parameters:
+      - in: path
+        name: bus_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus Assignment.
+        required: true
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BusAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusAssignment'
+          description: ''
+    patch:
+      operationId: manager_bus_assignments_partial_update
+      summary: Partial update a bus assignment (Manager only)
+      parameters:
+      - in: path
+        name: bus_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus Assignment.
+        required: true
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBusAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBusAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBusAssignmentRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusAssignment'
+          description: ''
+    delete:
+      operationId: manager_bus_assignments_destroy
+      summary: Delete a bus assignment (Manager only)
+      parameters:
+      - in: path
+        name: bus_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus Assignment.
+        required: true
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/buses/:
+    get:
+      operationId: manager_buses_list
+      summary: List all buses
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBusList'
+          description: ''
+    post:
+      operationId: manager_buses_create
+      summary: Create a bus (Manager only)
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bus'
+          description: ''
+  /api/manager/buses/{bus_id}/:
+    get:
+      operationId: manager_buses_retrieve
+      summary: Retrieve a bus
+      parameters:
+      - in: path
+        name: bus_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus.
+        required: true
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bus'
+          description: ''
+    put:
+      operationId: manager_buses_update
+      summary: Update a bus (Manager only)
+      parameters:
+      - in: path
+        name: bus_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus.
+        required: true
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BusRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bus'
+          description: ''
+    patch:
+      operationId: manager_buses_partial_update
+      summary: Partial update a bus (Manager only)
+      parameters:
+      - in: path
+        name: bus_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus.
+        required: true
+      tags:
+      - buses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBusRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bus'
+          description: ''
+    delete:
+      operationId: manager_buses_destroy
+      summary: Delete a bus (Manager only)
+      parameters:
+      - in: path
+        name: bus_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Bus.
+        required: true
+      tags:
+      - buses
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/dashboard/:
+    get:
+      operationId: manager_dashboard_retrieve
+      summary: Manager dashboard — system overview stats and alerts
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/manager/incidents/:
+    get:
+      operationId: manager_incidents_list
+      summary: List all incidents (Manager only)
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - incidents
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedIncidentList'
+          description: ''
+    post:
+      operationId: manager_incidents_create
+      summary: Report an incident (Manager only)
+      tags:
+      - incidents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+  /api/manager/incidents/{incident_id}/:
+    get:
+      operationId: manager_incidents_retrieve
+      summary: Retrieve an incident (Manager only)
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+    put:
+      operationId: manager_incidents_update
+      summary: Update an incident (Manager only)
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+    patch:
+      operationId: manager_incidents_partial_update
+      summary: Partial update an incident (Manager only)
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+    delete:
+      operationId: manager_incidents_destroy
+      summary: Delete an incident (Manager only)
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/incidents/{incident_id}/resolve/:
+    patch:
+      operationId: manager_incidents_resolve_partial_update
+      summary: Resolve an incident
+      parameters:
+      - in: path
+        name: incident_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Incident.
+        required: true
+      tags:
+      - incidents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentResolveRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentResolveRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIncidentResolveRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+          description: ''
+        '404':
+          description: Incident not found
+  /api/manager/lines/:
+    get:
+      operationId: manager_lines_list
+      summary: List all lines
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLineList'
+          description: ''
+    post:
+      operationId: manager_lines_create
+      summary: Create a line (Manager only)
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineWrite'
+          description: ''
+  /api/manager/lines/{line_id}/:
+    get:
+      operationId: manager_lines_retrieve
+      summary: Retrieve a line with stations
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+          description: ''
+    put:
+      operationId: manager_lines_update
+      summary: Update a line (Manager only)
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LineWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineWrite'
+          description: ''
+    patch:
+      operationId: manager_lines_partial_update
+      summary: Partial update a line (Manager only)
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLineWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLineWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLineWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineWrite'
+          description: ''
+    delete:
+      operationId: manager_lines_destroy
+      summary: Delete a line (Manager only)
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/lines/{line_id}/timetable/:
+    get:
+      operationId: manager_lines_timetable_retrieve
+      summary: View timetable for a line (schedules with trips)
+      parameters:
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Line.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timetable'
+          description: ''
+  /api/manager/notifications/:
+    get:
+      operationId: manager_notifications_list
+      summary: List notifications — filter by type or read status
+      parameters:
+      - in: query
+        name: filter
+        schema:
+          type: string
+          enum:
+          - all
+          - assignments
+          - incidents
+          - unread
+          - warnings
+        description: 'Filter notifications: all (default), unread, incidents, warnings,
+          assignments'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/manager/notifications/{id}/:
+    get:
+      operationId: manager_notifications_retrieve
+      summary: Retrieve a notification
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    patch:
+      operationId: manager_notifications_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    delete:
+      operationId: manager_notifications_destroy
+      summary: Delete a notification
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/notifications/{id}/read/:
+    patch:
+      operationId: manager_notifications_read_partial_update
+      summary: Mark a notification as read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/manager/notifications/read-all/:
+    patch:
+      operationId: manager_notifications_read_all_partial_update
+      summary: Mark all notifications as read
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: All notifications marked as read
+  /api/manager/reports/:
+    get:
+      operationId: manager_reports_retrieve
+      summary: Generate system reports — capacity per line, seat occupancy, bus usage
+        (Manager only)
+      tags:
+      - reports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/manager/schedules/:
+    get:
+      operationId: manager_schedules_list
+      summary: List all schedules
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - schedules
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScheduleList'
+          description: ''
+    post:
+      operationId: manager_schedules_create
+      summary: Create a schedule (Manager only)
+      tags:
+      - schedules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+  /api/manager/schedules/{schedule_id}/:
+    get:
+      operationId: manager_schedules_retrieve
+      summary: Retrieve a schedule
+      parameters:
+      - in: path
+        name: schedule_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Schedule.
+        required: true
+      tags:
+      - schedules
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+    put:
+      operationId: manager_schedules_update
+      summary: Update a schedule (Manager only)
+      parameters:
+      - in: path
+        name: schedule_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Schedule.
+        required: true
+      tags:
+      - schedules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+    patch:
+      operationId: manager_schedules_partial_update
+      summary: Partial update a schedule (Manager only)
+      parameters:
+      - in: path
+        name: schedule_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Schedule.
+        required: true
+      tags:
+      - schedules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+    delete:
+      operationId: manager_schedules_destroy
+      summary: Delete a schedule (Manager only)
+      parameters:
+      - in: path
+        name: schedule_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Schedule.
+        required: true
+      tags:
+      - schedules
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/seat-assignments/:
+    get:
+      operationId: manager_seat_assignments_list
+      summary: List all seat assignments — includes conflict checking on create
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSeatAssignmentList'
+          description: ''
+    post:
+      operationId: manager_seat_assignments_create
+      summary: Assign a student to a seat (Manager only)
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeatAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SeatAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SeatAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeatAssignment'
+          description: ''
+  /api/manager/seat-assignments/{seat_assignment_id}/:
+    get:
+      operationId: manager_seat_assignments_retrieve
+      summary: Retrieve a seat assignment
+      parameters:
+      - in: path
+        name: seat_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Seat Assignment.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeatAssignment'
+          description: ''
+    delete:
+      operationId: manager_seat_assignments_destroy
+      summary: Cancel a seat assignment (Manager only)
+      parameters:
+      - in: path
+        name: seat_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Seat Assignment.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/stations/:
+    get:
+      operationId: manager_stations_list
+      summary: List all stations
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStationList'
+          description: ''
+    post:
+      operationId: manager_stations_create
+      summary: Create a station (Manager only)
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: ''
+  /api/manager/stations/{station_id}/:
+    get:
+      operationId: manager_stations_retrieve
+      summary: Retrieve a station
+      parameters:
+      - in: path
+        name: station_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Station.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: ''
+    put:
+      operationId: manager_stations_update
+      summary: Update a station (Manager only)
+      parameters:
+      - in: path
+        name: station_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Station.
+        required: true
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: ''
+    patch:
+      operationId: manager_stations_partial_update
+      summary: Partial update a station (Manager only)
+      parameters:
+      - in: path
+        name: station_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Station.
+        required: true
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: ''
+    delete:
+      operationId: manager_stations_destroy
+      summary: Delete a station (Manager only)
+      parameters:
+      - in: path
+        name: station_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Station.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/students/:
+    get:
+      operationId: manager_students_list
+      summary: List all students (Manager only)
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStudentDetailList'
+          description: ''
+  /api/manager/students/{student_id}/:
+    get:
+      operationId: manager_students_retrieve
+      summary: Retrieve student detail (Manager only)
+      parameters:
+      - in: path
+        name: student_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDetail'
+          description: ''
+    put:
+      operationId: manager_students_update
+      summary: Update student (Manager only)
+      parameters:
+      - in: path
+        name: student_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StudentDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StudentDetailRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDetail'
+          description: ''
+    patch:
+      operationId: manager_students_partial_update
+      summary: Partial update student (Manager only)
+      parameters:
+      - in: path
+        name: student_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStudentDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStudentDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStudentDetailRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDetail'
+          description: ''
+  /api/manager/subscriptions/:
+    get:
+      operationId: manager_subscriptions_list
+      summary: List all subscriptions (Manager only)
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubscriptionList'
+          description: ''
+  /api/manager/subscriptions/{subscription_id}/:
+    get:
+      operationId: manager_subscriptions_retrieve
+      summary: Retrieve a subscription (Manager only)
+      parameters:
+      - in: path
+        name: subscription_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Subscription.
+        required: true
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/manager/trips/:
+    get:
+      operationId: manager_trips_list
+      summary: List all trips
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTripList'
+          description: ''
+    post:
+      operationId: manager_trips_create
+      summary: Create a trip (Manager only)
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripWrite'
+          description: ''
+  /api/manager/trips/{trip_id}/:
+    get:
+      operationId: manager_trips_retrieve
+      summary: Retrieve a trip
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+    put:
+      operationId: manager_trips_update
+      summary: Update a trip (Manager only)
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripWrite'
+          description: ''
+    patch:
+      operationId: manager_trips_partial_update
+      summary: Partial update a trip (Manager only)
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTripWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTripWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTripWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripWrite'
+          description: ''
+    delete:
+      operationId: manager_trips_destroy
+      summary: Delete a trip (Manager only)
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/manager/trips/{trip_id}/end/:
+    post:
+      operationId: manager_trips_end_create
+      summary: End/complete a trip
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+        '400':
+          description: Trip not in progress
+  /api/manager/trips/{trip_id}/start/:
+    post:
+      operationId: manager_trips_start_create
+      summary: Start a trip
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+        '400':
+          description: Trip already started
+  /api/notifications/:
+    get:
+      operationId: notifications_list
+      summary: List notifications — filter by type or read status
+      parameters:
+      - in: query
+        name: filter
+        schema:
+          type: string
+          enum:
+          - all
+          - assignments
+          - incidents
+          - unread
+          - warnings
+        description: 'Filter notifications: all (default), unread, incidents, warnings,
+          assignments'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/notifications/{id}/:
+    get:
+      operationId: notifications_retrieve
+      summary: Retrieve a notification
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    patch:
+      operationId: notifications_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    delete:
+      operationId: notifications_destroy
+      summary: Delete a notification
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/notifications/{id}/read/:
+    patch:
+      operationId: notifications_read_partial_update
+      summary: Mark a notification as read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notifications/read-all/:
+    patch:
+      operationId: notifications_read_all_partial_update
+      summary: Mark all notifications as read
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: All notifications marked as read
+  /api/reports/:
+    get:
+      operationId: reports_retrieve
+      summary: Generate system reports — capacity per line, seat occupancy, bus usage
+        (Manager only)
+      tags:
+      - reports
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/rows/:
+    get:
+      operationId: rows_list
+      summary: List all rows
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRowList'
+          description: ''
+    post:
+      operationId: rows_create
+      summary: Create a row for a bus (Manager only)
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RowRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RowRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+          description: ''
+  /api/rows/{row_id}/:
+    get:
+      operationId: rows_retrieve
+      summary: Retrieve a row
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Row.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+          description: ''
+    put:
+      operationId: rows_update
+      summary: Update a row (Manager only)
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Row.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RowRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RowRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+          description: ''
+    patch:
+      operationId: rows_partial_update
+      summary: Partial update a row (Manager only)
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Row.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRowRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRowRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Row'
+          description: ''
+    delete:
+      operationId: rows_destroy
+      summary: Delete a row (Manager only)
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Row.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/schedules/:
+    get:
+      operationId: schedules_list
+      summary: List all schedules
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - schedules
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedScheduleList'
+          description: ''
+    post:
+      operationId: schedules_create
+      summary: Create a schedule (Manager only)
+      tags:
+      - schedules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+  /api/schedules/{schedule_id}/:
+    get:
+      operationId: schedules_retrieve
+      summary: Retrieve a schedule
+      parameters:
+      - in: path
+        name: schedule_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Schedule.
+        required: true
+      tags:
+      - schedules
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+    put:
+      operationId: schedules_update
+      summary: Update a schedule (Manager only)
+      parameters:
+      - in: path
+        name: schedule_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Schedule.
+        required: true
+      tags:
+      - schedules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+    patch:
+      operationId: schedules_partial_update
+      summary: Partial update a schedule (Manager only)
+      parameters:
+      - in: path
+        name: schedule_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Schedule.
+        required: true
+      tags:
+      - schedules
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedScheduleRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+          description: ''
+    delete:
+      operationId: schedules_destroy
+      summary: Delete a schedule (Manager only)
+      parameters:
+      - in: path
+        name: schedule_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Schedule.
+        required: true
+      tags:
+      - schedules
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/seat-assignments/:
+    get:
+      operationId: seat_assignments_list
+      summary: List all seat assignments — includes conflict checking on create
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSeatAssignmentList'
+          description: ''
+    post:
+      operationId: seat_assignments_create
+      summary: Assign a student to a seat (Manager only)
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeatAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SeatAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SeatAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeatAssignment'
+          description: ''
+  /api/seat-assignments/{seat_assignment_id}/:
+    get:
+      operationId: seat_assignments_retrieve
+      summary: Retrieve a seat assignment
+      parameters:
+      - in: path
+        name: seat_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Seat Assignment.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeatAssignment'
+          description: ''
+    delete:
+      operationId: seat_assignments_destroy
+      summary: Cancel a seat assignment (Manager only)
+      parameters:
+      - in: path
+        name: seat_assignment_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Seat Assignment.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/stations/:
+    get:
+      operationId: stations_list
+      summary: List all stations
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStationList'
+          description: ''
+    post:
+      operationId: stations_create
+      summary: Create a station (Manager only)
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: ''
+  /api/stations/{station_id}/:
+    get:
+      operationId: stations_retrieve
+      summary: Retrieve a station
+      parameters:
+      - in: path
+        name: station_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Station.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: ''
+    put:
+      operationId: stations_update
+      summary: Update a station (Manager only)
+      parameters:
+      - in: path
+        name: station_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Station.
+        required: true
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: ''
+    patch:
+      operationId: stations_partial_update
+      summary: Partial update a station (Manager only)
+      parameters:
+      - in: path
+        name: station_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Station.
+        required: true
+      tags:
+      - lines
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: ''
+    delete:
+      operationId: stations_destroy
+      summary: Delete a station (Manager only)
+      parameters:
+      - in: path
+        name: station_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Station.
+        required: true
+      tags:
+      - lines
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/students/me/:
+    get:
+      operationId: students_me_retrieve
+      summary: Get own student profile
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentDetail'
+          description: ''
+    put:
+      operationId: students_me_update
+      summary: Update own student profile
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StudentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StudentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+          description: ''
+  /api/students/me/dashboard/:
+    get:
+      operationId: students_me_dashboard_retrieve
+      summary: Student dashboard — active subscription, recent seat, unread notifications
+        count
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/students/me/seat/:
+    get:
+      operationId: students_me_seat_retrieve
+      summary: Get the logged-in student's current seat assignment
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentSeatView'
+          description: ''
+  /api/subscriptions/:
+    post:
+      operationId: subscriptions_create
+      summary: Subscribe student to a line
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubscribeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubscribeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+        '400':
+          description: Already subscribed or validation error
+  /api/subscriptions/active/:
+    get:
+      operationId: subscriptions_active_retrieve
+      summary: Get current active subscription
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/subscriptions/change-line/:
+    put:
+      operationId: subscriptions_change_line_update
+      summary: Change student subscribed line — deactivates old, creates new, logs
+        history
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeLineRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangeLineRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangeLineRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+        '400':
+          description: No active subscription or validation error
+  /api/subscriptions/history/:
+    get:
+      operationId: subscriptions_history_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - subscriptions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubscriptionHistoryList'
+          description: ''
+  /api/trips/:
+    get:
+      operationId: trips_list
+      summary: List all trips
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTripList'
+          description: ''
+    post:
+      operationId: trips_create
+      summary: Create a trip (Manager only)
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripWrite'
+          description: ''
+  /api/trips/{trip_id}/:
+    get:
+      operationId: trips_retrieve
+      summary: Retrieve a trip
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+    put:
+      operationId: trips_update
+      summary: Update a trip (Manager only)
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripWrite'
+          description: ''
+    patch:
+      operationId: trips_partial_update
+      summary: Partial update a trip (Manager only)
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTripWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTripWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTripWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripWrite'
+          description: ''
+    delete:
+      operationId: trips_destroy
+      summary: Delete a trip (Manager only)
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/trips/{trip_id}/end/:
+    post:
+      operationId: trips_end_create
+      summary: End/complete a trip
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+        '400':
+          description: Trip not in progress
+  /api/trips/{trip_id}/start/:
+    post:
+      operationId: trips_start_create
+      summary: Start a trip
+      parameters:
+      - in: path
+        name: trip_id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Trip.
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+        '400':
+          description: Trip already started
+components:
+  schemas:
+    Bus:
+      type: object
+      properties:
+        bus_id:
+          type: integer
+          readOnly: true
+        registration_number:
+          type: string
+          maxLength: 50
+        model:
+          type: string
+          maxLength: 100
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        status:
+          $ref: '#/components/schemas/BusStatusEnum'
+      required:
+      - bus_id
+      - capacity
+      - model
+      - registration_number
+    BusAssignment:
+      type: object
+      properties:
+        bus_assignment_id:
+          type: integer
+          readOnly: true
+        bus:
+          type: integer
+        bus_detail:
+          allOf:
+          - $ref: '#/components/schemas/Bus'
+          readOnly: true
+        line:
+          type: integer
+        line_detail:
+          allOf:
+          - $ref: '#/components/schemas/Line'
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+        is_active:
+          type: string
+          readOnly: true
+        capacity_warning:
+          type: string
+          readOnly: true
+      required:
+      - bus
+      - bus_assignment_id
+      - bus_detail
+      - capacity_warning
+      - is_active
+      - line
+      - line_detail
+      - start_date
+    BusAssignmentRequest:
+      type: object
+      properties:
+        bus:
+          type: integer
+        line:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+      required:
+      - bus
+      - line
+      - start_date
+    BusRequest:
+      type: object
+      properties:
+        registration_number:
+          type: string
+          minLength: 1
+          maxLength: 50
+        model:
+          type: string
+          minLength: 1
+          maxLength: 100
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        status:
+          $ref: '#/components/schemas/BusStatusEnum'
+      required:
+      - capacity
+      - model
+      - registration_number
+    BusStatusEnum:
+      enum:
+      - available
+      - in_service
+      - maintenance
+      type: string
+      description: |-
+        * `available` - Available
+        * `in_service` - In Service
+        * `maintenance` - Maintenance
+    ChangeLineRequest:
+      type: object
+      properties:
+        new_line_id:
+          type: integer
+        reason:
+          type: string
+          default: ''
+      required:
+      - new_line_id
+    DayOfWeekEnum:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      description: |-
+        * `0` - Monday
+        * `1` - Tuesday
+        * `2` - Wednesday
+        * `3` - Thursday
+        * `4` - Friday
+        * `5` - Saturday
+        * `6` - Sunday
+    Incident:
+      type: object
+      properties:
+        incident_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        incident_type:
+          $ref: '#/components/schemas/IncidentTypeEnum'
+        incident_type_display:
+          type: string
+          readOnly: true
+        description:
+          type: string
+        reported_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resolved:
+          type: boolean
+        trip:
+          type: integer
+        trip_detail:
+          allOf:
+          - $ref: '#/components/schemas/Trip'
+          readOnly: true
+      required:
+      - description
+      - incident_id
+      - incident_type_display
+      - name
+      - reported_at
+      - trip
+      - trip_detail
+    IncidentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        incident_type:
+          $ref: '#/components/schemas/IncidentTypeEnum'
+        description:
+          type: string
+          minLength: 1
+        resolved:
+          type: boolean
+        trip:
+          type: integer
+      required:
+      - description
+      - name
+      - trip
+    IncidentTypeEnum:
+      enum:
+      - delay
+      - breakdown
+      - accident
+      - capacity
+      - other
+      type: string
+      description: |-
+        * `delay` - Delay
+        * `breakdown` - Breakdown
+        * `accident` - Accident
+        * `capacity` - Capacity Exceeded
+        * `other` - Other
+    Line:
+      type: object
+      properties:
+        line_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        stations:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineStation'
+          readOnly: true
+      required:
+      - line_id
+      - name
+      - stations
+    LineRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+      required:
+      - name
+    LineStation:
+      type: object
+      properties:
+        line_station_id:
+          type: integer
+          readOnly: true
+        station:
+          allOf:
+          - $ref: '#/components/schemas/Station'
+          readOnly: true
+        order_index:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - line_station_id
+      - order_index
+      - station
+    LineStationRequest:
+      type: object
+      properties:
+        station_id:
+          type: integer
+          writeOnly: true
+        order_index:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - order_index
+      - station_id
+    LineWrite:
+      type: object
+      properties:
+        line_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+      required:
+      - line_id
+      - name
+    LineWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+      required:
+      - name
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    Notification:
+      type: object
+      properties:
+        notification_id:
+          type: integer
+          readOnly: true
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        notification_type_display:
+          type: string
+          readOnly: true
+        message:
+          type: string
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        student:
+          type: integer
+          readOnly: true
+      required:
+      - created_at
+      - message
+      - notification_id
+      - notification_type_display
+      - student
+    NotificationTypeEnum:
+      enum:
+      - trip_started
+      - trip_delay
+      - seat_assigned
+      - line_change
+      - incident
+      - assignment_conflict
+      - capacity_warning
+      - general
+      type: string
+      description: |-
+        * `trip_started` - Trip Started
+        * `trip_delay` - Trip Delay
+        * `seat_assigned` - Seat Assigned
+        * `line_change` - Line Change
+        * `incident` - Incident
+        * `assignment_conflict` - Assignment Conflict
+        * `capacity_warning` - Capacity Warning
+        * `general` - General
+    PaginatedBusAssignmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusAssignment'
+    PaginatedBusList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bus'
+    PaginatedIncidentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Incident'
+    PaginatedLineList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Line'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedRowList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Row'
+    PaginatedScheduleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedule'
+    PaginatedSeatAssignmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeatAssignment'
+    PaginatedStationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Station'
+    PaginatedStudentDetailList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudentDetail'
+    PaginatedSubscriptionHistoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionHistory'
+    PaginatedSubscriptionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    PaginatedTripList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trip'
+    PatchedBusAssignmentRequest:
+      type: object
+      properties:
+        bus:
+          type: integer
+        line:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+    PatchedBusRequest:
+      type: object
+      properties:
+        registration_number:
+          type: string
+          minLength: 1
+          maxLength: 50
+        model:
+          type: string
+          minLength: 1
+          maxLength: 100
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        status:
+          $ref: '#/components/schemas/BusStatusEnum'
+    PatchedIncidentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        incident_type:
+          $ref: '#/components/schemas/IncidentTypeEnum'
+        description:
+          type: string
+          minLength: 1
+        resolved:
+          type: boolean
+        trip:
+          type: integer
+    PatchedIncidentResolveRequest:
+      type: object
+      properties:
+        resolved:
+          type: boolean
+          default: true
+    PatchedLineWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+    PatchedNotificationRequest:
+      type: object
+      properties:
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        message:
+          type: string
+          minLength: 1
+        is_read:
+          type: boolean
+    PatchedRowRequest:
+      type: object
+      properties:
+        row_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        seat_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        bus:
+          type: integer
+    PatchedScheduleRequest:
+      type: object
+      properties:
+        line:
+          type: integer
+        day_of_week:
+          allOf:
+          - $ref: '#/components/schemas/DayOfWeekEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        departure_time:
+          type: string
+          format: time
+        arrival_time:
+          type: string
+          format: time
+        direction:
+          type: string
+          maxLength: 50
+    PatchedStationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+    PatchedStudentDetailRequest:
+      type: object
+      properties:
+        registration_number:
+          type: string
+          minLength: 1
+          maxLength: 50
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 20
+    PatchedTripWriteRequest:
+      type: object
+      properties:
+        schedule:
+          type: integer
+        bus:
+          type: integer
+        status:
+          $ref: '#/components/schemas/Status180Enum'
+    RegisterRequest:
+      type: object
+      properties:
+        registration_number:
+          type: string
+          minLength: 1
+          maxLength: 50
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone:
+          type: string
+          maxLength: 20
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password_confirm:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - first_name
+      - last_name
+      - password
+      - password_confirm
+      - registration_number
+    RoleEnum:
+      enum:
+      - Admin
+      - TransportManager
+      type: string
+      description: |-
+        * `Admin` - Admin
+        * `TransportManager` - Transport Manager
+    Row:
+      type: object
+      properties:
+        row_id:
+          type: integer
+          readOnly: true
+        row_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        seat_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        bus:
+          type: integer
+        bus_registration:
+          type: string
+          readOnly: true
+      required:
+      - bus
+      - bus_registration
+      - row_id
+      - row_number
+      - seat_count
+    RowRequest:
+      type: object
+      properties:
+        row_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        seat_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        bus:
+          type: integer
+      required:
+      - bus
+      - row_number
+      - seat_count
+    Schedule:
+      type: object
+      properties:
+        schedule_id:
+          type: integer
+          readOnly: true
+        line:
+          type: integer
+        line_name:
+          type: string
+          readOnly: true
+        day_of_week:
+          allOf:
+          - $ref: '#/components/schemas/DayOfWeekEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        day_of_week_display:
+          type: string
+          readOnly: true
+        departure_time:
+          type: string
+          format: time
+        arrival_time:
+          type: string
+          format: time
+        direction:
+          type: string
+          maxLength: 50
+      required:
+      - arrival_time
+      - day_of_week
+      - day_of_week_display
+      - departure_time
+      - line
+      - line_name
+      - schedule_id
+    ScheduleRequest:
+      type: object
+      properties:
+        line:
+          type: integer
+        day_of_week:
+          allOf:
+          - $ref: '#/components/schemas/DayOfWeekEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        departure_time:
+          type: string
+          format: time
+        arrival_time:
+          type: string
+          format: time
+        direction:
+          type: string
+          maxLength: 50
+      required:
+      - arrival_time
+      - day_of_week
+      - departure_time
+      - line
+    SeatAssignment:
+      type: object
+      properties:
+        seat_assignment_id:
+          type: integer
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+        seat_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        student:
+          type: integer
+        student_detail:
+          allOf:
+          - $ref: '#/components/schemas/Student'
+          readOnly: true
+        trip:
+          type: integer
+        trip_detail:
+          allOf:
+          - $ref: '#/components/schemas/Trip'
+          readOnly: true
+        row:
+          type: integer
+        row_detail:
+          allOf:
+          - $ref: '#/components/schemas/Row'
+          readOnly: true
+      required:
+      - assigned_at
+      - row
+      - row_detail
+      - seat_assignment_id
+      - seat_number
+      - student
+      - student_detail
+      - trip
+      - trip_detail
+    SeatAssignmentRequest:
+      type: object
+      properties:
+        seat_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        student:
+          type: integer
+        trip:
+          type: integer
+        row:
+          type: integer
+      required:
+      - row
+      - seat_number
+      - student
+      - trip
+    Station:
+      type: object
+      properties:
+        station_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        address:
+          type: string
+          maxLength: 255
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - address
+      - name
+      - station_id
+    StationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - address
+      - name
+    Status180Enum:
+      enum:
+      - scheduled
+      - in_progress
+      - completed
+      - cancelled
+      type: string
+      description: |-
+        * `scheduled` - Scheduled
+        * `in_progress` - In Progress
+        * `completed` - Completed
+        * `cancelled` - Cancelled
+    Student:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          readOnly: true
+        registration_number:
+          type: string
+          maxLength: 50
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 20
+      required:
+      - email
+      - first_name
+      - last_name
+      - registration_number
+      - student_id
+    StudentDetail:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          readOnly: true
+        registration_number:
+          type: string
+          maxLength: 50
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 20
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+      required:
+      - email
+      - first_name
+      - last_name
+      - registration_number
+      - student_id
+      - user
+    StudentDetailRequest:
+      type: object
+      properties:
+        registration_number:
+          type: string
+          minLength: 1
+          maxLength: 50
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 20
+      required:
+      - email
+      - first_name
+      - last_name
+      - registration_number
+    StudentRequest:
+      type: object
+      properties:
+        registration_number:
+          type: string
+          minLength: 1
+          maxLength: 50
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 20
+      required:
+      - email
+      - first_name
+      - last_name
+      - registration_number
+    StudentSeatView:
+      type: object
+      properties:
+        seat_assignment_id:
+          type: integer
+          readOnly: true
+        seat_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        row_number:
+          type: integer
+        trip_id:
+          type: integer
+        trip_status:
+          type: string
+        line_name:
+          type: string
+        assigned_at:
+          type: string
+          format: date-time
+      required:
+      - line_name
+      - row_number
+      - seat_assignment_id
+      - seat_number
+      - trip_id
+      - trip_status
+    SubscribeRequest:
+      type: object
+      properties:
+        line_id:
+          type: integer
+      required:
+      - line_id
+    Subscription:
+      type: object
+      properties:
+        subscription_id:
+          type: integer
+          readOnly: true
+        student:
+          type: integer
+        student_name:
+          type: string
+          readOnly: true
+        line:
+          type: integer
+        line_detail:
+          allOf:
+          - $ref: '#/components/schemas/Line'
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          readOnly: true
+        end_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        is_active:
+          type: boolean
+          readOnly: true
+      required:
+      - end_date
+      - is_active
+      - line
+      - line_detail
+      - start_date
+      - student
+      - student_name
+      - subscription_id
+    SubscriptionHistory:
+      type: object
+      properties:
+        subscription_history_id:
+          type: integer
+          readOnly: true
+        change_date:
+          type: string
+          format: date-time
+          readOnly: true
+        reason:
+          type: string
+          maxLength: 255
+        student:
+          type: integer
+        old_line:
+          type: integer
+          nullable: true
+        old_line_name:
+          type: string
+          readOnly: true
+        new_line:
+          type: integer
+          nullable: true
+        new_line_name:
+          type: string
+          readOnly: true
+      required:
+      - change_date
+      - new_line_name
+      - old_line_name
+      - student
+      - subscription_history_id
+    Timetable:
+      type: object
+      properties:
+        line:
+          $ref: '#/components/schemas/Line'
+        schedules:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - line
+      - schedules
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenResponse:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+      - access
+      - refresh
+      - user
+    Trip:
+      type: object
+      properties:
+        trip_id:
+          type: integer
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/Status180Enum'
+        actual_departure:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        actual_arrival:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        schedule:
+          type: integer
+        schedule_detail:
+          allOf:
+          - $ref: '#/components/schemas/Schedule'
+          readOnly: true
+        bus:
+          type: integer
+        bus_detail:
+          allOf:
+          - $ref: '#/components/schemas/Bus'
+          readOnly: true
+        line_name:
+          type: string
+          readOnly: true
+        delay_minutes:
+          type: string
+          readOnly: true
+      required:
+      - actual_arrival
+      - actual_departure
+      - bus
+      - bus_detail
+      - delay_minutes
+      - line_name
+      - schedule
+      - schedule_detail
+      - trip_id
+    TripRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status180Enum'
+        schedule:
+          type: integer
+        bus:
+          type: integer
+      required:
+      - bus
+      - schedule
+    TripWrite:
+      type: object
+      properties:
+        trip_id:
+          type: integer
+          readOnly: true
+        schedule:
+          type: integer
+        bus:
+          type: integer
+        status:
+          $ref: '#/components/schemas/Status180Enum'
+      required:
+      - bus
+      - schedule
+      - trip_id
+    TripWriteRequest:
+      type: object
+      properties:
+        schedule:
+          type: integer
+        bus:
+          type: integer
+        status:
+          $ref: '#/components/schemas/Status180Enum'
+      required:
+      - bus
+      - schedule
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - email
+      - name
+      - user_id
+    UserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - email
+      - name
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+tags:
+- name: auth
+  description: Authentication — register, login, token refresh
+- name: accounts
+  description: Student and user profile management
+- name: lines
+  description: Bus lines, stations, and timetables
+- name: schedules
+  description: Schedule management
+- name: buses
+  description: Bus fleet and bus-to-line assignments
+- name: subscriptions
+  description: Student line subscriptions and history
+- name: trips
+  description: Trip management, rows, and seat assignments
+- name: incidents
+  description: Incident reporting and resolution
+- name: notifications
+  description: Alerts and notifications
+- name: reports
+  description: Aggregated system reports (Manager only)
