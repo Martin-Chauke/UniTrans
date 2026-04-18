@@ -12,7 +12,6 @@ A Django REST Framework API for managing university bus transport, including stu
 ```
 UniTrans/
 ├── .env                    # Local environment variables (not committed)
-├── .env.example            # Environment variable template
 ├── README.md
 ├── venv/                   # Local virtual environment (not committed)
 └── backend-api/            # Django REST API
@@ -68,9 +67,13 @@ pip install -r backend-api\requirements.txt
 
 ### 5. Configure environment variables
 
-```powershell
-copy .env.example .env
-# Edit .env — set your SECRET_KEY and DATABASE_URL
+Create a `.env` file in the repo root and set the following variables:
+
+```
+SECRET_KEY=<your-secret-key>
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname>
 ```
 
 The `DATABASE_URL` format is:
