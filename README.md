@@ -7,12 +7,41 @@ A Django REST Framework API for managing university bus transport, including stu
 - Python 3.12
 - PostgreSQL 14+
 
+## Repository Structure
+
+```
+UniTrans/
+├── .env                    # Local environment variables (not committed)
+├── .env.example            # Environment variable template
+├── README.md
+├── venv/                   # Local virtual environment (not committed)
+└── backend-api/            # Django REST API
+    ├── manage.py
+    ├── requirements.txt
+    ├── unitrans_api.yaml   # OpenAPI 3.0 spec snapshot
+    ├── unitrans/           # Django project config
+    │   ├── settings.py
+    │   ├── urls.py
+    │   ├── wsgi.py
+    │   └── asgi.py
+    └── apps/
+        ├── accounts/       # User + Student, JWT auth
+        ├── lines/          # Line, Station, LineStation
+        ├── schedules/      # Schedule
+        ├── buses/          # Bus, BusAssignment
+        ├── trips/          # Trip, Row, SeatAssignment
+        ├── subscriptions/  # Subscription, SubscriptionHistory
+        ├── incidents/      # Incident
+        ├── notifications/  # Notification / Alert
+        └── reports/        # Aggregated reporting
+```
+
 ## Setup
 
 ### 1. Clone / navigate to project directory
 
 ```powershell
-cd d:\UniTrans
+cd D:\UniTrans
 ```
 
 ### 2. Create virtual environment (Python 3.12)
@@ -34,7 +63,7 @@ venv\Scripts\activate.bat
 ### 4. Install dependencies
 
 ```powershell
-pip install -r requirements.txt
+pip install -r backend-api\requirements.txt
 ```
 
 ### 5. Configure environment variables
@@ -53,12 +82,14 @@ DATABASE_URL=postgresql://postgres:secret@localhost:5432/unitrans_db
 DATABASE_URL=postgresql://admin:pass@db.example.com:5432/unitrans_prod
 ```
 
-### 6==5. Create PostgreSQL database
+### 6. Create PostgreSQL database
 
+Create the database named in your `DATABASE_URL` before running migrations.
 
 ### 7. Run migrations
 
 ```powershell
+cd backend-api
 python manage.py migrate
 ```
 
@@ -74,6 +105,8 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+> All `manage.py` commands must be run from inside the `backend-api/` directory.
+
 ## API Documentation
 
 Once the server is running, visit:
@@ -85,29 +118,6 @@ Once the server is running, visit:
 ## Django Admin
 
 Visit http://localhost:8000/admin/ and log in with your superuser credentials.
-
-## Project Structure
-
-```
-UniTrans/
-├── requirements.txt
-├── .env.example
-├── manage.py
-├── unitrans/               # Django project config
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-└── apps/
-    ├── accounts/           # User + Student, JWT auth
-    ├── lines/              # Line, Station, LineStation
-    ├── schedules/          # Schedule
-    ├── buses/              # Bus, BusAssignment
-    ├── trips/              # Trip, Row, SeatAssignment
-    ├── subscriptions/      # Subscription, SubscriptionHistory
-    ├── incidents/          # Incident
-    ├── notifications/      # Notification / Alert
-    └── reports/            # Aggregated reporting
-```
 
 ## API Endpoints Overview
 
