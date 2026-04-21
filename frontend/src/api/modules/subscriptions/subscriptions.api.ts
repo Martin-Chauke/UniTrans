@@ -56,3 +56,11 @@ export const managerGetSubscriptions = (page?: number) =>
  */
 export const managerGetSubscription = (id: number) =>
   client.get<Subscription>(`/api/manager/subscriptions/${id}/`);
+
+/**
+ * POST /api/manager/students/{student_id}/assign-line/
+ * Assign or change the line subscription for a student (Manager only).
+ * Deactivates existing active subscription and creates a new one.
+ */
+export const managerAssignLine = (studentId: number, lineId: number) =>
+  client.post<Subscription>(`/api/manager/students/${studentId}/assign-line/`, { line_id: lineId });

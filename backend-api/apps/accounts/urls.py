@@ -2,6 +2,8 @@ from django.urls import path
 
 from .views import (
     CustomTokenRefreshView,
+    DriverDetailView,
+    DriverListView,
     LoginView,
     ManagerDashboardView,
     RegisterView,
@@ -23,4 +25,6 @@ student_urlpatterns = [
     path('manager/dashboard/', ManagerDashboardView.as_view(), name='manager-dashboard'),
     path('manager/students/', StudentListView.as_view(), name='manager-student-list'),
     path('manager/students/<int:student_id>/', StudentDetailView.as_view(), name='manager-student-detail'),
+    path('manager/drivers/', DriverListView.as_view(), name='manager-driver-list'),
+    path('manager/drivers/<int:driver_id>/', DriverDetailView.as_view(), name='manager-driver-detail'),
 ]

@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from apps.accounts.models import Student
 from apps.accounts.permissions import IsAdminOrManager
 from apps.lines.models import Line
 
@@ -146,3 +148,39 @@ class SubscriptionViewSet(ReadOnlyModelViewSet):
     queryset = Subscription.objects.select_related('student', 'line').all().order_by('-start_date')
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAdminOrManager]
+
+
+@extend_schema(tags=['subscriptions'])
+class ManagerAssignLineView(APIView):
+    permission_classes = [IsAdminOrManager]
+
+    @extend_schema(
+        summary='Assign or change a student\'s subscribed line (Manager only)',
+        request=None,
+        responses={
+            201: SubscriptionSerializer,
+            400: OpenApiResponse(description='Validation error'),
+            404: OpenApiResponse(description='Student or line not found'),
+        },
+    )
+    def post(self, request, student_id):
+        student = get_object_or_404(Student, student_id=student_id)
+        line_id = request.data.get('line_id')
+        if not line_id:
+            return Response({'detail': 'line_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        line = get_object_or_404(Line, pk=line_id)
+
+        old_sub = student.subscriptions.filter(is_active=True).select_related('line').first()
+        old_line = old_sub.line if old_sub else None
+
+        if old_sub and old_sub.line == line:
+            return Response({'detail': 'Student is already subscribed to this line.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            if old_sub:
+                old_sub.deactivate()
+            new_sub = Subscription.objects.create(student=student, line=line)
+            if old_line:
+                SubscriptionHistory.log_change(student=student, old_line=old_line, new_line=line)
+
+        return Response(SubscriptionSerializer(new_sub).data, status=status.HTTP_201_CREATED)

@@ -6,10 +6,12 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .models import Student, User
+from .models import Driver, Student, User
 from .permissions import IsAdminOrManager
 from .serializers import (
+    DriverSerializer,
     LoginSerializer,
+    PatchedDriverSerializer,
     RegisterSerializer,
     StudentDetailSerializer,
     StudentSerializer,
@@ -156,6 +158,7 @@ class ManagerDashboardView(APIView):
         active_trips = Trip.objects.filter(status='in_progress').count()
         available_buses = Bus.objects.filter(status='available').count()
         open_incidents = Incident.objects.filter(resolved=False).count()
+        total_drivers = Driver.objects.count()
 
         unresolved_incidents = Incident.objects.filter(resolved=False).order_by('-reported_at')[:5]
         from apps.incidents.serializers import IncidentSerializer
@@ -168,6 +171,7 @@ class ManagerDashboardView(APIView):
                 'active_trips': active_trips,
                 'available_buses': available_buses,
                 'open_incidents': open_incidents,
+                'total_drivers': total_drivers,
             },
             'system_alerts': incidents_data,
         })
@@ -188,9 +192,35 @@ class StudentListView(generics.ListAPIView):
     get=extend_schema(summary='Retrieve student detail (Manager only)'),
     put=extend_schema(summary='Update student (Manager only)'),
     patch=extend_schema(summary='Partial update student (Manager only)'),
+    delete=extend_schema(summary='Delete student (Manager only)'),
 )
-class StudentDetailView(generics.RetrieveUpdateAPIView):
+class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentDetailSerializer
     permission_classes = [IsAdminOrManager]
     lookup_field = 'student_id'
+
+
+@extend_schema(tags=['accounts'])
+@extend_schema_view(
+    get=extend_schema(summary='List all drivers (Manager only)'),
+    post=extend_schema(summary='Create a driver (Manager only)'),
+)
+class DriverListView(generics.ListCreateAPIView):
+    queryset = Driver.objects.select_related('assigned_bus').all().order_by('last_name', 'first_name')
+    serializer_class = DriverSerializer
+    permission_classes = [IsAdminOrManager]
+
+
+@extend_schema(tags=['accounts'])
+@extend_schema_view(
+    get=extend_schema(summary='Retrieve driver detail (Manager only)'),
+    put=extend_schema(summary='Update driver (Manager only)'),
+    patch=extend_schema(summary='Partial update driver (Manager only)'),
+    delete=extend_schema(summary='Delete driver (Manager only)'),
+)
+class DriverDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Driver.objects.select_related('assigned_bus').all()
+    serializer_class = DriverSerializer
+    permission_classes = [IsAdminOrManager]
+    lookup_field = 'driver_id'

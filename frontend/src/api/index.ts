@@ -1,4 +1,5 @@
 export * as authApi from "@/api/modules/auth/auth.api";
+export * as driversApi from "@/api/modules/drivers/drivers.api";
 export * as accountsApi from "@/api/modules/accounts/accounts.api";
 export * as linesApi from "@/api/modules/lines/lines.api";
 export * as schedulesApi from "@/api/modules/schedules/schedules.api";

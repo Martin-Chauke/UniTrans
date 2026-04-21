@@ -76,3 +76,10 @@ export const patchStudent = (
   studentId: number,
   data: PatchedStudentDetailRequest
 ) => client.patch<StudentDetail>(`/api/manager/students/${studentId}/`, data);
+
+/**
+ * DELETE /api/manager/students/{student_id}/
+ * Delete a student record (Manager only).
+ */
+export const deleteStudent = (studentId: number) =>
+  client.delete(`/api/manager/students/${studentId}/`);

@@ -3,13 +3,13 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Student, User
+from .models import Driver, Student, User
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['user_id', 'name', 'email', 'role', 'date_joined']
+        fields = ['user_id', 'name', 'email', 'role', 'is_active', 'date_joined']
         read_only_fields = ['user_id', 'date_joined']
 
 
@@ -106,3 +106,30 @@ class TokenResponseSerializer(serializers.Serializer):
     access = serializers.CharField()
     refresh = serializers.CharField()
     user = UserSerializer()
+
+
+class DriverSerializer(serializers.ModelSerializer):
+    assigned_bus_detail = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Driver
+        fields = [
+            'driver_id', 'first_name', 'last_name', 'email', 'phone',
+            'license_number', 'assigned_bus', 'assigned_bus_detail', 'is_active',
+        ]
+        read_only_fields = ['driver_id']
+
+    def get_assigned_bus_detail(self, obj):
+        if obj.assigned_bus:
+            from apps.buses.serializers import BusSerializer
+            return BusSerializer(obj.assigned_bus).data
+        return None
+
+
+class PatchedDriverSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = [
+            'first_name', 'last_name', 'email', 'phone',
+            'license_number', 'assigned_bus', 'is_active',
+        ]

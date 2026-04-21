@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ActiveSubscriptionView,
     ChangeLineView,
+    ManagerAssignLineView,
     SubscribeView,
     SubscriptionHistoryView,
     SubscriptionViewSet,
@@ -17,4 +18,5 @@ urlpatterns = router.urls + [
     path('subscriptions/active/', ActiveSubscriptionView.as_view(), name='subscription-active'),
     path('subscriptions/change-line/', ChangeLineView.as_view(), name='subscription-change-line'),
     path('subscriptions/history/', SubscriptionHistoryView.as_view(), name='subscription-history'),
+    path('manager/students/<int:student_id>/assign-line/', ManagerAssignLineView.as_view(), name='manager-assign-line'),
 ]

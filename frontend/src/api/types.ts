@@ -74,6 +74,7 @@ export interface User {
   name: string;
   email: string;
   role?: UserRole;
+  is_active?: boolean;
   date_joined: string;
 }
 
@@ -268,8 +269,8 @@ export interface BusAssignment {
   start_date: string;
   end_date?: string | null;
   notes?: string;
-  is_active: string;
-  capacity_warning: string;
+  is_active: boolean;
+  capacity_warning: string | { warning: boolean; message?: string; student_count?: number; bus_capacity?: number };
 }
 
 export interface BusAssignmentRequest {
@@ -510,6 +511,40 @@ export interface ReportData {
   totals: ReportTotals;
 }
 
+// ─── Driver ───────────────────────────────────────────────────────────────────
+
+export interface Driver {
+  driver_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  license_number: string;
+  assigned_bus?: number | null;
+  assigned_bus_detail?: Bus | null;
+  is_active?: boolean;
+}
+
+export interface DriverRequest {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  license_number: string;
+  assigned_bus?: number | null;
+  is_active?: boolean;
+}
+
+export interface PatchedDriverRequest {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  license_number?: string;
+  assigned_bus?: number | null;
+  is_active?: boolean;
+}
+
 // ─── Dashboards ───────────────────────────────────────────────────────────────
 
 export interface ActiveSubscriptionSummary {
@@ -537,6 +572,7 @@ export interface ManagerStats {
   active_trips: number;
   available_buses: number;
   open_incidents: number;
+  total_drivers: number;
 }
 
 export interface ManagerDashboard {

@@ -1,6 +1,8 @@
 import { client } from "@/api/client";
 import type {
   Line,
+  LineStation,
+  LineStationRequest,
   LineWrite,
   LineWriteRequest,
   PatchedLineWriteRequest,
@@ -188,3 +190,24 @@ export const managerPatchStation = (
  */
 export const managerDeleteStation = (id: number) =>
   client.delete(`/api/manager/stations/${id}/`);
+
+// ─── Manager — line stations (nested) ────────────────────────────────────────
+
+/**
+ * GET /api/manager/lines/{lineId}/stations/
+ */
+export const managerGetLineStations = (lineId: number) =>
+  client.get<PaginatedList<LineStation>>(`/api/manager/lines/${lineId}/stations/`);
+
+/**
+ * POST /api/manager/lines/{lineId}/stations/
+ * Add a station to a line (Manager only).
+ */
+export const managerAddStationToLine = (lineId: number, data: LineStationRequest) =>
+  client.post<LineStation>(`/api/manager/lines/${lineId}/stations/`, data);
+
+/**
+ * DELETE /api/manager/lines/{lineId}/stations/{lineStationId}/
+ */
+export const managerRemoveStationFromLine = (lineId: number, lineStationId: number) =>
+  client.delete(`/api/manager/lines/${lineId}/stations/${lineStationId}/`);

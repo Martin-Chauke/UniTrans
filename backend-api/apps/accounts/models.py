@@ -84,3 +84,28 @@ class Student(models.Model):
 
     def get_subscription_history(self):
         return self.subscription_histories.all()
+
+
+class Driver(models.Model):
+    driver_id = models.AutoField(primary_key=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=20, blank=True)
+    license_number = models.CharField(max_length=50, unique=True)
+    assigned_bus = models.OneToOneField(
+        'buses.Bus',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='driver',
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'drivers'
+        verbose_name = 'Driver'
+        verbose_name_plural = 'Drivers'
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name} ({self.license_number})'
