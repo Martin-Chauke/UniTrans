@@ -6,6 +6,8 @@ import { useAuthContext } from "@/context/AuthContext";
 import { useManagerNotifications, useMarkAllNotificationsRead, useMarkNotificationRead } from "@/hooks/useNotifications";
 import styles from "./TopBar.module.css";
 
+const PROFILE_IMAGE_KEY = "unitrans_profile_image";
+
 interface TopBarProps {
   alertCount?: number;
 }
@@ -25,14 +27,38 @@ export function TopBar({ alertCount = 0 }: TopBarProps) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "notifications">("profile");
   const [searchValue, setSearchValue] = useState("");
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const { user, logout } = useAuthContext();
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: notifData } = useManagerNotifications();
   const { mutate: markAllRead } = useMarkAllNotificationsRead();
   const { mutate: markRead } = useMarkNotificationRead();
+
+  useEffect(() => {
+    const stored = localStorage.getItem(PROFILE_IMAGE_KEY);
+    if (stored) setProfileImage(stored);
+    const storedTheme = localStorage.getItem("unitrans_theme");
+    if (storedTheme === "dark") {
+      setTheme("dark");
+      document.documentElement.dataset.theme = "dark";
+    }
+  }, []);
+
+  const handleThemeToggle = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    if (next === "dark") {
+      document.documentElement.dataset.theme = "dark";
+    } else {
+      delete document.documentElement.dataset.theme;
+    }
+    localStorage.setItem("unitrans_theme", next);
+  };
 
   const notifications = notifData?.results ?? [];
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -47,6 +73,18 @@ export function TopBar({ alertCount = 0 }: TopBarProps) {
   const handleLogout = () => {
     logout();
     router.push("/login");
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = ev.target?.result as string;
+      setProfileImage(result);
+      localStorage.setItem(PROFILE_IMAGE_KEY, result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleOpenNotif = () => {
@@ -76,6 +114,15 @@ export function TopBar({ alertCount = 0 }: TopBarProps) {
     ? user.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
     : "M";
 
+  const userAvatarContent = profileImage ? (
+    <img src={profileImage} alt="Profile" className={styles.iconBtnAvatar} />
+  ) : (
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+
   return (
     <header className={styles.topbar}>
       <form onSubmit={handleSearch} className={styles.searchForm}>
@@ -95,6 +142,25 @@ export function TopBar({ alertCount = 0 }: TopBarProps) {
       </form>
 
       <div className={styles.actions}>
+        {/* Theme toggle */}
+        <button
+          className={styles.iconBtn}
+          onClick={handleThemeToggle}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? (
+            <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <circle cx="12" cy="12" r="5" />
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+            </svg>
+          ) : (
+            <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
+        </button>
+
         {/* Notifications bell */}
         <div ref={notifRef} style={{ position: "relative" }}>
           <button className={styles.iconBtn} onClick={handleOpenNotif} aria-label="Notifications">
@@ -149,10 +215,7 @@ export function TopBar({ alertCount = 0 }: TopBarProps) {
             onClick={handleOpenUser}
             aria-label="User menu"
           >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
+            {userAvatarContent}
           </button>
 
           {userMenuOpen && (
@@ -175,13 +238,54 @@ export function TopBar({ alertCount = 0 }: TopBarProps) {
               {activeTab === "profile" && (
                 <div className={styles.profileTab}>
                   <div className={styles.profileInfo}>
-                    <div className={styles.profileAvatar}>{initials}</div>
+                    <div className={styles.profileAvatarWrap}>
+                      {profileImage ? (
+                        <img src={profileImage} alt="Profile" className={styles.profileAvatarImg} />
+                      ) : (
+                        <div className={styles.profileAvatar}>{initials}</div>
+                      )}
+                      <button
+                        className={styles.profileImageBtn}
+                        onClick={() => fileInputRef.current?.click()}
+                        title="Upload photo"
+                      >
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleImageChange}
+                      />
+                    </div>
                     <div className={styles.profileDetails}>
                       <span className={styles.profileName}>{user?.name ?? "Manager"}</span>
                       <span className={styles.profileEmail}>{user?.email ?? ""}</span>
                       <span className={styles.profileRole}>{user?.role ?? "manager"}</span>
+                      {user?.date_joined && (
+                        <span className={styles.profileJoined}>
+                          Joined {new Date(user.date_joined).toLocaleDateString()}
+                        </span>
+                      )}
                     </div>
                   </div>
+                  {user?.user_id && (
+                    <div className={styles.profileMeta}>
+                      <div className={styles.profileMetaRow}>
+                        <span className={styles.profileMetaLabel}>User ID</span>
+                        <span className={styles.profileMetaValue}>#{user.user_id}</span>
+                      </div>
+                      <div className={styles.profileMetaRow}>
+                        <span className={styles.profileMetaLabel}>Role</span>
+                        <span className={styles.profileMetaValue}>{user.role ?? "Manager"}</span>
+                      </div>
+                    </div>
+                  )}
                   <button className={styles.profileSignout} onClick={handleLogout}>
                     Sign out
                   </button>

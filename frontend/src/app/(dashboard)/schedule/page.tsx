@@ -138,9 +138,19 @@ export default function SchedulePage() {
                         View stations
                       </button>
                     </td>
-                    <td>
+                    <td className={styles.actionsCell}>
                       <button className={styles.actionBtn} onClick={() => handleEdit(s)}>
                         Edit
+                      </button>
+                      <button
+                        className={styles.deleteBtn}
+                        onClick={() => {
+                          if (window.confirm(`Delete schedule ${scheduleId}? This cannot be undone.`)) {
+                            deleteSchedule(s.schedule_id);
+                          }
+                        }}
+                      >
+                        Delete
                       </button>
                     </td>
                   </tr>

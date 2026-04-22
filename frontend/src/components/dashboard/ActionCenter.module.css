@@ -23,20 +23,20 @@
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
 }
 
 .btn {
-  height: 42px;
+  height: 34px;
   border: none;
   border-radius: var(--radius-sm);
   color: #fff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   transition: opacity 0.15s;
   width: 100%;
 }

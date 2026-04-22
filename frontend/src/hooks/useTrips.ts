@@ -2,11 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { tripsApi } from "@/api";
 import type { TripWriteRequest } from "@/api/types";
 
-export function useTrips(page?: number) {
+export function useTrips(page?: number, pageSize?: number) {
   return useQuery({
-    queryKey: ["trips", page],
+    queryKey: ["trips", page, pageSize],
     queryFn: async () => {
-      const res = await tripsApi.managerGetTrips(page);
+      const res = await tripsApi.managerGetTrips(page, pageSize);
       return res.data;
     },
   });

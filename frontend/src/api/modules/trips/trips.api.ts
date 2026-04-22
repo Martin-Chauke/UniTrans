@@ -72,8 +72,8 @@ export const endTrip = (tripId: number) =>
 /**
  * GET /api/manager/trips/
  */
-export const managerGetTrips = (page?: number) =>
-  client.get<PaginatedList<Trip>>("/api/manager/trips/", { params: { page } });
+export const managerGetTrips = (page?: number, pageSize?: number) =>
+  client.get<PaginatedList<Trip>>("/api/manager/trips/", { params: { page, page_size: pageSize } });
 
 /**
  * POST /api/manager/trips/

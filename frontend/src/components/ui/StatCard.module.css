@@ -7,6 +7,13 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: default;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-md);
 }
 
 .content {

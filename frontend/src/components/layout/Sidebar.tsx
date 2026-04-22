@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
 
@@ -115,12 +116,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
       <div className={styles.brand}>
-        {!collapsed && (
-          <div className={styles.brandContent}>
-            <span className={styles.brandName}>UniTrans</span>
-            <span className={styles.brandRole}>Manager Portal</span>
-          </div>
-        )}
+        <div className={styles.brandLogoArea}>
+          <Image
+            src="/logo.png"
+            alt="UniTrans"
+            width={collapsed ? 40 : 48}
+            height={collapsed ? 40 : 48}
+            className={styles.brandLogo}
+          />
+          {!collapsed && (
+            <div className={styles.brandContent}>
+              <span className={styles.brandName}>
+                <span className={styles.brandNameUni}>Uni</span>
+                <span className={styles.brandNameTrans}>Trans</span>
+              </span>
+              <span className={styles.brandRole}>Manager Portal</span>
+            </div>
+          )}
+        </div>
         <button className={styles.toggleBtn} onClick={onToggle} aria-label="Toggle sidebar">
           <svg
             width="16"

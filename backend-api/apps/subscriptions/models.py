@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.utils import timezone
 
@@ -7,7 +9,7 @@ from apps.lines.models import Line
 
 class Subscription(models.Model):
     subscription_id = models.AutoField(primary_key=True)
-    start_date = models.DateField(default=timezone.now)
+    start_date = models.DateField(default=datetime.date.today)
     end_date = models.DateField(null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='subscriptions')
     line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='subscriptions')

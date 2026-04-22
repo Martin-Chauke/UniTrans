@@ -11,6 +11,7 @@ import { AddStudentModal } from "@/components/students/AddStudentModal";
 import { AddDriverModal } from "@/components/drivers/AddDriverModal";
 import { useManagerDashboard } from "@/hooks/useDashboard";
 import { useSchedules } from "@/hooks/useSchedules";
+import { useStudents } from "@/hooks/useStudents";
 import styles from "./dashboard.module.css";
 
 const StudentsIcon = () => (
@@ -48,6 +49,7 @@ const DriversIcon = () => (
 export default function DashboardPage() {
   const { data: dashboard, isLoading } = useManagerDashboard();
   const { data: schedulesData } = useSchedules();
+  const { data: studentsData } = useStudents();
 
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [addDriverOpen, setAddDriverOpen] = useState(false);
@@ -57,6 +59,10 @@ export default function DashboardPage() {
   const stats = dashboard?.stats;
   const alerts = dashboard?.system_alerts ?? [];
   const schedules = schedulesData?.results ?? [];
+  const students = studentsData?.results ?? [];
+  const activeStudents = students.filter((s) => s.user?.is_active !== false).length;
+  const inactiveStudents = students.filter((s) => s.user?.is_active === false).length;
+  const studentSubtitle = students.length > 0 ? `${activeStudents} active / ${inactiveStudents} inactive` : undefined;
 
   return (
     <div className={styles.page}>
@@ -69,7 +75,7 @@ export default function DashboardPage() {
         <StatCard
           title="Total Students"
           value={isLoading ? "—" : stats?.total_students ?? 0}
-          subtitle="+ 12 this month"
+          subtitle={studentSubtitle}
           icon={<StudentsIcon />}
           href="/students"
         />
@@ -97,13 +103,13 @@ export default function DashboardPage() {
       </div>
 
       <div className={styles.midRow}>
+        <PendingAlerts incidents={alerts} />
         <ActionCenter
           onAddStudent={() => setAddStudentOpen(true)}
           onAddDriver={() => setAddDriverOpen(true)}
           onReportIncident={() => setReportIncidentOpen(true)}
           onQuickSchedule={() => setQuickScheduleOpen(true)}
         />
-        <PendingAlerts incidents={alerts} />
       </div>
 
       <RecentSchedules schedules={schedules} onQuickSchedule={() => setQuickScheduleOpen(true)} />

@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthProvider } from "@/context/AuthContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -16,6 +16,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   );
+
+  useEffect(() => {
+    const stored = localStorage.getItem("unitrans_theme");
+    if (stored === "dark") {
+      document.documentElement.dataset.theme = "dark";
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

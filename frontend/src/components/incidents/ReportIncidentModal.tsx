@@ -22,7 +22,7 @@ interface ReportIncidentModalProps {
 }
 
 export function ReportIncidentModal({ open, onClose, defaultTripId }: ReportIncidentModalProps) {
-  const { data: tripsData } = useTrips();
+  const { data: tripsData, isLoading: tripsLoading } = useTrips(undefined, 100);
   const { mutate: createIncident, isPending } = useCreateIncident();
 
   const [form, setForm] = useState({
@@ -95,8 +95,9 @@ export function ReportIncidentModal({ open, onClose, defaultTripId }: ReportInci
               className={styles.select}
               value={form.trip || ""}
               onChange={(e) => setForm((f) => ({ ...f, trip: Number(e.target.value) }))}
+              disabled={tripsLoading}
             >
-              <option value="">Select a trip</option>
+              <option value="">{tripsLoading ? "Loading trips..." : trips.length === 0 ? "No trips available" : "Select a trip"}</option>
               {trips.map((t) => (
                 <option key={t.trip_id} value={t.trip_id}>
                   TRP{String(t.trip_id).padStart(3, "0")} — {t.line_name}

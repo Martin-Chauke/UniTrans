@@ -16,25 +16,48 @@
 }
 
 .brand {
-  padding: 16px 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 64px;
+  min-height: 68px;
+  gap: 8px;
+}
+
+.brandLogoArea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.brandLogo {
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 4px;
 }
 
 .brandContent {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .brandName {
   font-size: 16px;
   font-weight: 800;
-  color: var(--color-primary);
   letter-spacing: -0.3px;
   line-height: 1.2;
+}
+
+.brandNameUni {
+  color: #1a56db;
+}
+
+.brandNameTrans {
+  color: #0e3a8c;
 }
 
 .brandRole {
@@ -42,6 +65,15 @@
   color: var(--color-muted);
   font-weight: 500;
   margin-top: 2px;
+}
+
+.collapsed .brand {
+  justify-content: center;
+  padding: 12px 8px;
+}
+
+.collapsed .brandLogoArea {
+  justify-content: center;
 }
 
 .toggleBtn {
@@ -63,7 +95,7 @@
 }
 
 .collapsed .toggleBtn {
-  margin: 0 auto;
+  flex-shrink: 0;
 }
 
 .nav {

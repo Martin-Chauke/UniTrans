@@ -7,6 +7,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { Badge, statusToBadge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { TripDetailModal } from "@/components/trips/TripDetailModal";
+import { CreateTripModal } from "@/components/trips/CreateTripModal";
 import { AddLineModal } from "@/components/lines/AddLineModal";
 import { EditLineModal } from "@/components/lines/EditLineModal";
 import type { Trip, Line } from "@/api/types";
@@ -29,6 +30,7 @@ export default function LinesTripsPage() {
 
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [addLineOpen, setAddLineOpen] = useState(false);
+  const [addTripOpen, setAddTripOpen] = useState(false);
   const [editLine, setEditLine] = useState<Line | null>(null);
   const [stationsLine, setStationsLine] = useState<Line | null>(null);
 
@@ -67,9 +69,15 @@ export default function LinesTripsPage() {
           <h1 className={styles.title}>Lines / Trips</h1>
           <p className={styles.subtitle}>Manage lines and monitor trip execution</p>
         </div>
-        <button className={styles.addBtn} onClick={() => setAddLineOpen(true)}>
-          + Add Line
-        </button>
+        {activeTab === "lines" ? (
+          <button className={styles.addBtn} onClick={() => setAddLineOpen(true)}>
+            + Add Line
+          </button>
+        ) : (
+          <button className={styles.addBtn} onClick={() => setAddTripOpen(true)}>
+            + Add Trip
+          </button>
+        )}
       </div>
 
       <div className={styles.tabs}>
@@ -266,6 +274,7 @@ export default function LinesTripsPage() {
 
       <AddLineModal open={addLineOpen} onClose={() => setAddLineOpen(false)} />
       <EditLineModal open={!!editLine} onClose={() => setEditLine(null)} line={editLine} />
+      <CreateTripModal open={addTripOpen} onClose={() => setAddTripOpen(false)} />
 
       {/* Stations detail modal */}
       <Modal

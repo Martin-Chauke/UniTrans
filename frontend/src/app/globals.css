@@ -36,6 +36,32 @@
   --radius-lg: 12px;
 }
 
+[data-theme="dark"] {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-red: #f87171;
+  --color-red-dark: #ef4444;
+  --color-green: #4ade80;
+  --color-green-light: #14532d;
+  --color-green-text: #86efac;
+  --color-yellow: #fbbf24;
+  --color-yellow-light: #78350f;
+  --color-yellow-text: #fde68a;
+  --color-blue-light: #1e3a5f;
+  --color-blue-text: #93c5fd;
+  --color-purple: #a78bfa;
+  --color-muted: #94a3b8;
+  --color-border: #334155;
+  --color-bg: #0f172a;
+  --color-white: #1e293b;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-sidebar-active: #1e3a5f;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+}
+
 html,
 body {
   height: 100%;
