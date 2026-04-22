@@ -1,41 +1,71 @@
-# UniTrans — API
+# UniTrans
 
-A Django REST Framework API for managing university bus transport, including student subscriptions, trip scheduling, seat assignments, incident reporting, and notifications.
+A full-stack university bus transport management system. The backend is a Django REST Framework API, and the frontend is a Next.js Manager Portal — both running locally and communicating over HTTP.
 
 ## Requirements
 
+**Backend**
 - Python 3.12
 - PostgreSQL 14+
+
+**Frontend**
+- Node.js 18+
+- npm 9+
 
 ## Repository Structure
 
 ```
 UniTrans/
-├── .env                    # Local environment variables (not committed)
+├── .env                    # Backend environment variables (not committed)
 ├── README.md
 ├── venv/                   # Local virtual environment (not committed)
-└── backend-api/            # Django REST API
-    ├── manage.py
-    ├── requirements.txt
-    ├── unitrans_api.yaml   # OpenAPI 3.0 spec snapshot
-    ├── unitrans/           # Django project config
-    │   ├── settings.py
-    │   ├── urls.py
-    │   ├── wsgi.py
-    │   └── asgi.py
-    └── apps/
-        ├── accounts/       # User + Student, JWT auth
-        ├── lines/          # Line, Station, LineStation
-        ├── schedules/      # Schedule
-        ├── buses/          # Bus, BusAssignment
-        ├── trips/          # Trip, Row, SeatAssignment
-        ├── subscriptions/  # Subscription, SubscriptionHistory
-        ├── incidents/      # Incident
-        ├── notifications/  # Notification / Alert
-        └── reports/        # Aggregated reporting
+├── backend-api/            # Django REST API
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── unitrans_api.yaml   # OpenAPI 3.0 spec snapshot
+│   ├── unitrans/           # Django project config
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   ├── wsgi.py
+│   │   └── asgi.py
+│   └── apps/
+│       ├── accounts/       # User + Student, JWT auth
+│       ├── lines/          # Line, Station, LineStation
+│       ├── schedules/      # Schedule
+│       ├── buses/          # Bus, BusAssignment
+│       ├── trips/          # Trip, Row, SeatAssignment
+│       ├── subscriptions/  # Subscription, SubscriptionHistory
+│       ├── incidents/      # Incident
+│       ├── notifications/  # Notification / Alert
+│       └── reports/        # Aggregated reporting
+└── frontend/               # Next.js Manager Portal
+    ├── package.json
+    ├── next.config.ts
+    ├── tsconfig.json
+    └── src/
+        ├── app/            # App Router pages & layouts
+        │   ├── login/
+        │   └── (dashboard)/
+        │       ├── dashboard/
+        │       ├── students/
+        │       ├── buses/
+        │       ├── drivers/
+        │       ├── lines-trips/
+        │       ├── incidents/
+        │       ├── schedule/
+        │       ├── subscription-history/
+        │       ├── settings/
+        │       └── search/
+        ├── api/            # Axios client + per-domain API modules
+        ├── components/     # UI and feature components
+        ├── context/        # AuthContext
+        ├── hooks/          # Data-fetching hooks (React Query)
+        └── providers/      # React Query + auth providers
 ```
 
-## Setup
+---
+
+## Backend Setup
 
 ### 1. Clone / navigate to project directory
 
@@ -110,9 +140,56 @@ python manage.py runserver
 
 > All `manage.py` commands must be run from inside the `backend-api/` directory.
 
+The API will be available at **http://localhost:8000**.
+
+---
+
+## Frontend Setup
+
+### 1. Navigate to the frontend directory
+
+```powershell
+cd D:\UniTrans\frontend
+```
+
+### 2. Install dependencies
+
+```powershell
+npm install
+```
+
+### 3. Configure environment variables
+
+Create a `.env.local` file inside `frontend/` and set the API base URL:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+If omitted, the Axios client defaults to `http://localhost:8000`.
+
+### 4. Run development server
+
+```powershell
+npm run dev
+```
+
+The Manager Portal will be available at **http://localhost:3000**.
+
+### Available scripts
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| Dev server | `npm run dev` | Start Next.js in development mode |
+| Production build | `npm run build` | Build for production |
+| Production server | `npm start` | Serve the production build |
+| Lint | `npm run lint` | Run ESLint |
+
+---
+
 ## API Documentation
 
-Once the server is running, visit:
+Once the backend server is running, visit:
 
 - **Swagger UI**: http://localhost:8000/api/docs/
 - **ReDoc**: http://localhost:8000/api/redoc/
@@ -121,6 +198,8 @@ Once the server is running, visit:
 ## Django Admin
 
 Visit http://localhost:8000/admin/ and log in with your superuser credentials.
+
+---
 
 ## API Endpoints Overview
 
@@ -157,6 +236,9 @@ Visit http://localhost:8000/admin/ and log in with your superuser credentials.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/manager/students/` | List all students |
+| GET | `/api/manager/drivers/` | List all drivers |
+| GET | `/api/manager/dashboard/` | Manager dashboard |
+| CRUD | `/api/manager/lines/` | Manage lines |
 | CRUD | `/api/buses/` | Manage buses |
 | CRUD | `/api/bus-assignments/` | Assign buses to lines |
 | CRUD | `/api/trips/` | Manage trips |
@@ -164,3 +246,4 @@ Visit http://localhost:8000/admin/ and log in with your superuser credentials.
 | CRUD | `/api/incidents/` | Manage incidents |
 | GET | `/api/reports/` | System reports |
 | GET | `/api/notifications/` | View notifications |
+| CRUD | `/api/manager/schedules/` | Manage schedules |
