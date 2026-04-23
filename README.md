@@ -69,19 +69,32 @@ UniTrans/
 
 ### 1. Clone / navigate to project directory
 
+Navigate to the project directory.
+
+For example:
+
+```bash
+cd /path/to/UniTrans
+```
+
+On Windows:
+
 ```powershell
 cd D:\UniTrans
 ```
 
 ### 2. Create virtual environment (Python 3.12)
 
-```powershell
+```bash
 python -m venv venv
 ```
 
 ### 3. Activate virtual environment
 
-```powershell
+```bash
+# Linux / macOS
+source venv/bin/activate
+
 # Windows PowerShell
 .\venv\Scripts\Activate.ps1
 
@@ -91,8 +104,8 @@ venv\Scripts\activate.bat
 
 ### 4. Install dependencies
 
-```powershell
-pip install -r backend-api\requirements.txt
+```bash
+pip install -r backend-api/requirements.txt
 ```
 
 ### 5. Configure environment variables
@@ -121,20 +134,20 @@ Create the database named in your `DATABASE_URL` before running migrations.
 
 ### 7. Run migrations
 
-```powershell
+```bash
 cd backend-api
 python manage.py migrate
 ```
 
 ### 8. Create superuser
 
-```powershell
+```bash
 python manage.py createsuperuser
 ```
 
 ### 9. Run development server
 
-```powershell
+```bash
 python manage.py runserver
 ```
 
@@ -148,13 +161,13 @@ The API will be available at **http://localhost:8000**.
 
 ### 1. Navigate to the frontend directory
 
-```powershell
-cd D:\UniTrans\frontend
+```bash
+cd frontend
 ```
 
 ### 2. Install dependencies
 
-```powershell
+```bash
 npm install
 ```
 
@@ -170,7 +183,7 @@ If omitted, the Axios client defaults to `http://localhost:8000`.
 
 ### 4. Run development server
 
-```powershell
+```bash
 npm run dev
 ```
 
