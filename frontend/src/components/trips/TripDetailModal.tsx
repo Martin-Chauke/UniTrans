@@ -40,7 +40,7 @@ export function TripDetailModal({ open, onClose, trip }: TripDetailModalProps) {
   const busId = trip.bus_detail?.registration_number ?? `BUS${String(trip.bus).padStart(3, "0")}`;
   const lineName = trip.line_name;
   const scheduleRef = `SCH${String(trip.schedule).padStart(3, "0")}`;
-  const occupied = Math.floor((trip.bus_detail?.capacity ?? 50) * 0.84);
+  const occupied = trip.occupied_seats ?? 0;
   const capacity = trip.bus_detail?.capacity ?? 50;
 
   const scheduledDep = trip.schedule_detail

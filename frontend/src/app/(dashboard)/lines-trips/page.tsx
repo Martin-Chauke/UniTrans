@@ -10,6 +10,7 @@ import { TripDetailModal } from "@/components/trips/TripDetailModal";
 import { CreateTripModal } from "@/components/trips/CreateTripModal";
 import { AddLineModal } from "@/components/lines/AddLineModal";
 import { EditLineModal } from "@/components/lines/EditLineModal";
+import { linesApi } from "@/api";
 import type { Trip, Line } from "@/api/types";
 import styles from "./lines-trips.module.css";
 
@@ -33,6 +34,17 @@ export default function LinesTripsPage() {
   const [addTripOpen, setAddTripOpen] = useState(false);
   const [editLine, setEditLine] = useState<Line | null>(null);
   const [stationsLine, setStationsLine] = useState<Line | null>(null);
+  const [tripStationsLoading, setTripStationsLoading] = useState<number | null>(null);
+
+  const handleViewTripStations = (trip: Trip) => {
+    const lineId = trip.schedule_detail?.line;
+    if (!lineId) return;
+    setTripStationsLoading(trip.trip_id);
+    linesApi.managerGetLine(lineId)
+      .then((res) => setStationsLine(res.data))
+      .catch(() => setStationsLine(null))
+      .finally(() => setTripStationsLoading(null));
+  };
 
   const filteredLines = useMemo(() => {
     if (!search.trim()) return lines;
@@ -233,15 +245,17 @@ export default function LinesTripsPage() {
                           : "—"}
                       </td>
                       <td>
-                        <span className={styles.stationsLink}>
+                        <button
+                          className={styles.stationsBtn}
+                          onClick={() => handleViewTripStations(trip)}
+                          disabled={tripStationsLoading === trip.trip_id}
+                        >
                           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                             <circle cx="12" cy="10" r="3" />
                           </svg>
-                          {trip.schedule_detail?.line_name
-                            ? "view"
-                            : "stations"}
-                        </span>
+                          {tripStationsLoading === trip.trip_id ? "loading…" : "view"}
+                        </button>
                       </td>
                       <td>{scheduleRef}</td>
                       <td>

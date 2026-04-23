@@ -21,18 +21,22 @@ class TripSerializer(serializers.ModelSerializer):
     bus_detail = BusSerializer(source='bus', read_only=True)
     delay_minutes = serializers.SerializerMethodField()
     line_name = serializers.CharField(source='schedule.line.name', read_only=True)
+    occupied_seats = serializers.SerializerMethodField()
 
     class Meta:
         model = Trip
         fields = [
             'trip_id', 'status', 'actual_departure', 'actual_arrival',
             'schedule', 'schedule_detail', 'bus', 'bus_detail',
-            'line_name', 'delay_minutes',
+            'line_name', 'delay_minutes', 'occupied_seats',
         ]
         read_only_fields = ['trip_id', 'actual_departure', 'actual_arrival']
 
     def get_delay_minutes(self, obj):
         return obj.calculate_delay()
+
+    def get_occupied_seats(self, obj):
+        return obj.seat_assignments.count()
 
 
 class TripWriteSerializer(serializers.ModelSerializer):

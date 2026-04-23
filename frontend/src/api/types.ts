@@ -302,6 +302,7 @@ export interface Trip {
   bus_detail: Bus;
   line_name: string;
   delay_minutes: string;
+  occupied_seats?: number;
 }
 
 export interface TripRequest {
