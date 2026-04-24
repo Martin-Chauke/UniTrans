@@ -118,7 +118,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className={styles.brand}>
         <div className={styles.brandLogoArea}>
           <Image
-            src="/logo.png"
+            src="/bus-icon-logo.png"
             alt="UniTrans"
             width={collapsed ? 40 : 48}
             height={collapsed ? 40 : 48}

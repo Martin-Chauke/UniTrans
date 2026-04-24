@@ -4,15 +4,20 @@ import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthContext } from "@/context/AuthContext";
-import styles from "./login.module.css";
+import styles from "./register.module.css";
 
-/* ──────────────────────────────────────────
-   SVG Icons
-────────────────────────────────────────── */
+/* ── SVG Icons ── */
 const PersonIcon = ({ size = 18, color = "#9ca3af" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="7" r="4" />
     <path d="M4 20c0-4 3.58-7 8-7s8 3 8 7" />
+  </svg>
+);
+
+const MailIcon = ({ size = 18, color = "#9ca3af" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="M2 7l10 7 10-7" />
   </svg>
 );
 
@@ -60,43 +65,51 @@ const PeopleIcon = ({ size = 18, color = "#fff" }: { size?: number; color?: stri
   </svg>
 );
 
-const SignInIcon = ({ size = 16, color = "#fff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-    <polyline points="10 17 15 12 10 7" />
-    <line x1="15" y1="12" x2="3" y2="12" />
+const CheckIcon = ({ size = 16, color = "#fff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 
-/* ──────────────────────────────────────────
-   Page
-────────────────────────────────────────── */
-export default function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuthContext();
+export default function RegisterPage() {
+  const { isAuthenticated, isLoading, registerManager } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) router.replace("/dashboard");
   }, [isAuthenticated, isLoading, router]);
 
-  const [email, setEmail]             = useState("");
-  const [password, setPassword]       = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe]   = useState(false);
-  const [error, setError]             = useState("");
-  const [loading, setLoading]         = useState(false);
+  const [name, setName]                   = useState("");
+  const [email, setEmail]                 = useState("");
+  const [password, setPassword]           = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [showPassword, setShowPassword]   = useState(false);
+  const [showConfirm, setShowConfirm]     = useState(false);
+  const [error, setError]                 = useState("");
+  const [loading, setLoading]             = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!email.trim())  { setError("Email is required."); return; }
-    if (!password)      { setError("Password is required."); return; }
+    if (!name.trim())               { setError("Full name is required."); return; }
+    if (!email.trim())              { setError("Email is required."); return; }
+    if (!password)                  { setError("Password is required."); return; }
+    if (password.length < 8)        { setError("Password must be at least 8 characters."); return; }
+    if (password !== passwordConfirm) { setError("Passwords do not match."); return; }
+
     setLoading(true);
     try {
-      await login({ email, password });
+      await registerManager({ name, email, password, password_confirm: passwordConfirm });
       router.push("/dashboard");
-    } catch {
-      setError("Invalid email or password. Please try again.");
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: Record<string, unknown> } };
+      if (axiosErr?.response?.data) {
+        const data = axiosErr.response.data;
+        const firstMsg = Object.values(data).flat()[0];
+        setError(typeof firstMsg === "string" ? firstMsg : "Registration failed. Please try again.");
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -105,25 +118,21 @@ export default function LoginPage() {
   return (
     <div className={styles.page}>
 
-      {/* ══ LEFT — full-bleed bus photo + dark gradient overlay ══ */}
+      {/* ══ LEFT ══ */}
       <div className={styles.leftPanel}>
         <div className={styles.leftOverlay} />
-
         <div className={styles.leftContent}>
-          {/* Logo circle */}
           <div className={styles.logoCircle}>
             <img src="/bus-logo.png" alt="UNITRANS" className={styles.logoImg} />
           </div>
-
           <h1 className={styles.brand}>UNITRANS</h1>
           <p className={styles.brandSub}>Transport Management System</p>
           <div className={styles.brandRule} />
           <h2 className={styles.portalLabel}>Manager Portal</h2>
           <p className={styles.portalDesc}>
-            Sign in to access your dashboard and manage transportation operations efficiently.
+            Create your account to start managing university transportation operations.
           </p>
 
-          {/* Three feature badges at the bottom */}
           <div className={styles.badges}>
             <div className={styles.badge}>
               <div className={styles.badgeIcon}><ShieldIcon size={18} color="#fff" /></div>
@@ -150,84 +159,74 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ══ RIGHT — light gray bg + floating white card ══ */}
+      {/* ══ RIGHT — floating card ══ */}
       <div className={styles.rightPanel}>
         <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Welcome Back!</h2>
-          <p className={styles.cardSub}>Please sign in to your manager account</p>
+          <h2 className={styles.cardTitle}>Create Manager Account</h2>
+          <p className={styles.cardSub}>Register your manager account to get started</p>
 
           {error && <div className={styles.errorBanner}>{error}</div>}
 
           <form onSubmit={handleSubmit} className={styles.form}>
-            {/* Username */}
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="email">Username</label>
+              <label className={styles.label} htmlFor="name">Full Name</label>
               <div className={styles.inputWrap}>
                 <span className={styles.inputIcon}><PersonIcon /></span>
-                <input
-                  id="email" type="email" autoComplete="email"
-                  value={email} onChange={(e) => setEmail(e.target.value)}
-                  className={styles.input} placeholder="Enter your username"
-                  disabled={loading}
-                />
+                <input id="name" type="text" autoComplete="name" value={name}
+                  onChange={(e) => setName(e.target.value)} className={styles.input}
+                  placeholder="Enter your full name" disabled={loading} />
               </div>
             </div>
 
-            {/* Password */}
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="email">Email Address</label>
+              <div className={styles.inputWrap}>
+                <span className={styles.inputIcon}><MailIcon /></span>
+                <input id="email" type="email" autoComplete="email" value={email}
+                  onChange={(e) => setEmail(e.target.value)} className={styles.input}
+                  placeholder="Enter your email address" disabled={loading} />
+              </div>
+            </div>
+
             <div className={styles.field}>
               <label className={styles.label} htmlFor="password">Password</label>
               <div className={styles.inputWrap}>
                 <span className={styles.inputIcon}><LockIcon /></span>
-                <input
-                  id="password" type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={password} onChange={(e) => setPassword(e.target.value)}
-                  className={styles.inputToggle} placeholder="Enter your password"
-                  disabled={loading}
-                />
-                <button
-                  type="button" className={styles.eyeBtn}
-                  onClick={() => setShowPassword((v) => !v)}
-                  tabIndex={-1} aria-label={showPassword ? "Hide" : "Show"}
-                >
+                <input id="password" type={showPassword ? "text" : "password"}
+                  autoComplete="new-password" value={password}
+                  onChange={(e) => setPassword(e.target.value)} className={styles.inputToggle}
+                  placeholder="Create a password (min. 8 chars)" disabled={loading} />
+                <button type="button" className={styles.eyeBtn}
+                  onClick={() => setShowPassword((v) => !v)} tabIndex={-1}>
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
             </div>
 
-            {/* Remember / Forgot */}
-            <div className={styles.row}>
-              <label className={styles.checkLabel}>
-                <input type="checkbox" checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className={styles.checkbox} />
-                Remember me
-              </label>
-              <Link href="#" className={styles.forgotLink}>Forgot password?</Link>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="passwordConfirm">Confirm Password</label>
+              <div className={styles.inputWrap}>
+                <span className={styles.inputIcon}><LockIcon /></span>
+                <input id="passwordConfirm" type={showConfirm ? "text" : "password"}
+                  autoComplete="new-password" value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)} className={styles.inputToggle}
+                  placeholder="Confirm your password" disabled={loading} />
+                <button type="button" className={styles.eyeBtn}
+                  onClick={() => setShowConfirm((v) => !v)} tabIndex={-1}>
+                  {showConfirm ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
             </div>
 
-            {/* Sign In */}
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              <SignInIcon />
-              {loading ? "Signing in…" : "Sign In"}
+              <CheckIcon />
+              {loading ? "Creating account…" : "Create Account"}
             </button>
           </form>
 
-          {/* OR */}
-          <div className={styles.orRow}>
-            <span className={styles.orLine} /><span className={styles.orText}>OR</span><span className={styles.orLine} />
-          </div>
-
-          {/* SSO */}
-          <button type="button" className={styles.ssoBtn}
-            onClick={() => alert("SSO is not yet configured.")}>
-            <ShieldIcon size={18} color="#132a5c" />
-            Single Sign-On (University Account)
-          </button>
-
           <p className={styles.switchLine}>
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className={styles.switchLink}>Create Account</Link>
+            Already have an account?{" "}
+            <Link href="/login" className={styles.switchLink}>Sign In</Link>
           </p>
         </div>
       </div>

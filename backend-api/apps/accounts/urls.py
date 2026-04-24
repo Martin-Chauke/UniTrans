@@ -6,6 +6,7 @@ from .views import (
     DriverListView,
     LoginView,
     ManagerDashboardView,
+    ManagerRegisterView,
     RegisterView,
     StudentDashboardView,
     StudentDetailView,
@@ -15,6 +16,7 @@ from .views import (
 
 auth_urlpatterns = [
     path('auth/register/', RegisterView.as_view(), name='auth-register'),
+    path('auth/manager/register/', ManagerRegisterView.as_view(), name='auth-manager-register'),
     path('auth/login/', LoginView.as_view(), name='auth-login'),
     path('auth/token/refresh/', CustomTokenRefreshView.as_view(), name='token-refresh'),
 ]

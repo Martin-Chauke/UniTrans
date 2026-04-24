@@ -11,6 +11,7 @@ from .permissions import IsAdminOrManager
 from .serializers import (
     DriverSerializer,
     LoginSerializer,
+    ManagerRegisterSerializer,
     PatchedDriverSerializer,
     RegisterSerializer,
     StudentDetailSerializer,
@@ -37,6 +38,30 @@ class RegisterView(APIView):
         serializer.is_valid(raise_exception=True)
         student = serializer.save()
         return Response(StudentSerializer(student).data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(tags=['auth'])
+class ManagerRegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        summary='Register a new transport manager account',
+        request=ManagerRegisterSerializer,
+        responses={
+            201: TokenResponseSerializer,
+            400: OpenApiResponse(description='Validation errors'),
+        },
+    )
+    def post(self, request):
+        serializer = ManagerRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': UserSerializer(user).data,
+        }, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(tags=['auth'])

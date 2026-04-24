@@ -1,6 +1,7 @@
 import { client, setTokens } from "@/api/client";
 import type {
   LoginRequest,
+  ManagerRegisterRequest,
   RegisterRequest,
   TokenRefreshRequest,
   TokenRefresh,
@@ -25,6 +26,16 @@ export const login = async (data: LoginRequest): Promise<TokenResponse> => {
  */
 export const register = (data: RegisterRequest) =>
   client.post<Student>("/api/auth/register/", data);
+
+/**
+ * POST /api/auth/manager/register/
+ * Register a new transport manager account and receive JWT tokens.
+ */
+export const registerManager = async (data: ManagerRegisterRequest): Promise<TokenResponse> => {
+  const response = await client.post<TokenResponse>("/api/auth/manager/register/", data);
+  setTokens(response.data.access, response.data.refresh);
+  return response.data;
+};
 
 /**
  * POST /api/auth/token/refresh/

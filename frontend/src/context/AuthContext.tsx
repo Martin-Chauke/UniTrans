@@ -3,13 +3,14 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { authApi } from "@/api";
 import { clearTokens, getAccessToken, setTokens } from "@/api/client";
-import type { User, LoginRequest } from "@/api/types";
+import type { User, LoginRequest, ManagerRegisterRequest } from "@/api/types";
 
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (data: LoginRequest) => Promise<void>;
+  registerManager: (data: ManagerRegisterRequest) => Promise<void>;
   logout: () => void;
 }
 
@@ -51,6 +52,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(response.user);
   }, []);
 
+  const registerManager = useCallback(async (data: ManagerRegisterRequest) => {
+    const response = await authApi.registerManager(data);
+    setTokens(response.access, response.refresh);
+    setUser(response.user);
+  }, []);
+
   const logout = useCallback(() => {
     clearTokens();
     setUser(null);
@@ -63,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         login,
+        registerManager,
         logout,
       }}
     >

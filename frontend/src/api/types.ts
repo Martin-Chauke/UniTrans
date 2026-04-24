@@ -52,6 +52,13 @@ export interface RegisterRequest {
   password_confirm: string;
 }
 
+export interface ManagerRegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  password_confirm: string;
+}
+
 export interface TokenRefreshRequest {
   refresh: string;
 }
