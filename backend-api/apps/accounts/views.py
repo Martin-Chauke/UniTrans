@@ -6,9 +6,12 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from .tokens import CustomAccessToken
+
 from .models import Driver, Student, User
 from .permissions import IsAdminOrManager
 from .serializers import (
+    ChangePasswordSerializer,
     DriverSerializer,
     LoginSerializer,
     ManagerRegisterSerializer,
@@ -56,9 +59,10 @@ class ManagerRegisterView(APIView):
         serializer = ManagerRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        access = CustomAccessToken.for_user(user)
         refresh = RefreshToken.for_user(user)
         return Response({
-            'access': str(refresh.access_token),
+            'access': str(access),
             'refresh': str(refresh),
             'user': UserSerializer(user).data,
         }, status=status.HTTP_201_CREATED)
@@ -80,9 +84,10 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        access = CustomAccessToken.for_user(user)
         refresh = RefreshToken.for_user(user)
         return Response({
-            'access': str(refresh.access_token),
+            'access': str(access),
             'refresh': str(refresh),
             'user': UserSerializer(user).data,
         })
@@ -91,6 +96,38 @@ class LoginView(APIView):
 @extend_schema(tags=['auth'], summary='Refresh JWT access token')
 class CustomTokenRefreshView(TokenRefreshView):
     pass
+
+
+@extend_schema(tags=['auth'])
+class ChangePasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        summary='Reset student password by email',
+        request=ChangePasswordSerializer,
+        responses={
+            200: OpenApiResponse(description='Password updated successfully.'),
+            400: OpenApiResponse(description='Validation errors'),
+        },
+    )
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        student = serializer.validated_data['student']
+        new_password = serializer.validated_data['new_password']
+
+        # Update the password on the linked User account
+        user = student.user
+        if user is None:
+            return Response({'detail': 'No user account linked to this student.'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save(update_fields=['password'])
+
+        # Also store plain password on Student model (matches existing pattern)
+        student.password = new_password
+        student.save(update_fields=['password'])
+
+        return Response({'detail': 'Password updated successfully.'}, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['accounts'])

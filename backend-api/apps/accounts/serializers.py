@@ -30,7 +30,7 @@ class StudentDetailSerializer(serializers.ModelSerializer):
         model = Student
         fields = [
             'student_id', 'registration_number', 'first_name',
-            'last_name', 'email', 'phone', 'user',
+            'last_name', 'email', 'phone', 'password', 'user',
         ]
         read_only_fields = ['student_id']
 
@@ -65,13 +65,11 @@ class RegisterSerializer(serializers.Serializer):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
 
-        # Students get a User account with the Admin role as a base;
-        # their student context is determined by the linked Student profile.
         user = User.objects.create_user(
             email=validated_data['email'],
             name=f"{validated_data['first_name']} {validated_data['last_name']}",
             password=password,
-            role=User.Role.ADMIN,
+            role=User.Role.STUDENT,
         )
         user.is_staff = False
         user.save(update_fields=['is_staff'])
@@ -134,6 +132,22 @@ class TokenResponseSerializer(serializers.Serializer):
     access = serializers.CharField()
     refresh = serializers.CharField()
     user = UserSerializer()
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    new_password = serializers.CharField(write_only=True, validators=[validate_password])
+    new_password_confirm = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({'new_password_confirm': 'Passwords do not match.'})
+        try:
+            student = Student.objects.get(email=attrs['email'])
+            attrs['student'] = student
+        except Student.DoesNotExist:
+            raise serializers.ValidationError({'email': 'No student account found with this email.'})
+        return attrs
 
 
 class DriverSerializer(serializers.ModelSerializer):

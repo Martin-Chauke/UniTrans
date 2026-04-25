@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    ChangePasswordView,
     CustomTokenRefreshView,
     DriverDetailView,
     DriverListView,
@@ -19,6 +20,7 @@ auth_urlpatterns = [
     path('auth/manager/register/', ManagerRegisterView.as_view(), name='auth-manager-register'),
     path('auth/login/', LoginView.as_view(), name='auth-login'),
     path('auth/token/refresh/', CustomTokenRefreshView.as_view(), name='token-refresh'),
+    path('auth/reset-password/', ChangePasswordView.as_view(), name='auth-reset-password'),
 ]
 
 student_urlpatterns = [

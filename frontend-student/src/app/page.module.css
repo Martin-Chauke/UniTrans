@@ -1,0 +1,502 @@
+/* ── Page wrapper ── */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  font-family: var(--font-sans);
+  color: #111827;
+}
+
+/* ───────────────────────────────────────────
+   NAVBAR
+─────────────────────────────────────────── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 68px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  gap: 24px;
+}
+
+.navBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.navLogoWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #1a56db;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.navTitle {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e40af;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+.navSub {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.navLinks {
+  display: flex;
+  list-style: none;
+  gap: 4px;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  position: relative;
+  text-decoration: none;
+}
+
+.navLink:hover {
+  color: #1a56db;
+  background: #eff6ff;
+}
+
+/* active underline — dynamic via JS state */
+.navLinkActive {
+  color: #1a56db !important;
+}
+
+.navLinkActive::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: #1a56db;
+  border-radius: 2px;
+}
+
+.navBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e40af;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 6px;
+  transition: background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.navBtn:hover {
+  background: #1a56db;
+}
+
+/* ───────────────────────────────────────────
+   HERO — full-bleed image, text overlay left
+─────────────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* fills the entire hero with the image */
+.heroBgImage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.heroBgImg {
+  object-fit: cover;
+  object-position: center right;
+}
+
+/* white fade from left so text is readable */
+.heroFadeOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    #ffffff 0%,
+    #ffffff 30%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+/* text content layer */
+.heroContent {
+  position: relative;
+  z-index: 2;
+  max-width: 520px;
+  padding: 64px 40px 64px 60px;
+}
+
+.heroBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #1a56db;
+  background: #dbeafe;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.heroTitle {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.heroTitleBlue {
+  color: #1a56db;
+}
+
+.heroDesc {
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.7;
+  margin-bottom: 36px;
+  max-width: 440px;
+}
+
+.heroFeatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.heroFeatureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.heroFeatureIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.heroFeatureTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.heroFeatureDesc {
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* ───────────────────────────────────────────
+   STATS BAR — individual cards
+─────────────────────────────────────────── */
+.statsBar {
+  display: flex;
+  gap: 16px;
+  background: #f9fafb;
+  padding: 24px 40px;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  min-width: 0;
+}
+
+.statIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: #dbeafe;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.statValue {
+  font-size: 26px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 2px;
+}
+
+.statSub {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+/* ───────────────────────────────────────────
+   CTA BANNER
+─────────────────────────────────────────── */
+.ctaBanner {
+  background: #1e3a8a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 60px;
+  gap: 40px;
+}
+
+.ctaLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.ctaShieldWrap {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ctaTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.ctaDesc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+  max-width: 340px;
+}
+
+.ctaSeparator {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.ctaRight {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-shrink: 0;
+  padding-left: 40px;
+}
+
+.ctaRightTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.ctaRightDesc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+  max-width: 260px;
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: none;
+  color: #1e3a8a;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.ctaBtn:hover {
+  background: #f0f6ff;
+}
+
+/* ───────────────────────────────────────────
+   FOOTER
+─────────────────────────────────────────── */
+.footer {
+  text-align: center;
+  padding: 16px 40px;
+  font-size: 12px;
+  color: #6b7280;
+  background: #f9fafb;
+}
+
+/* ───────────────────────────────────────────
+   RESPONSIVE
+─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .heroContent {
+    padding: 48px 32px 48px 40px;
+    max-width: 480px;
+  }
+
+  .heroTitle {
+    font-size: 36px;
+  }
+
+  .ctaBanner {
+    padding: 28px 40px;
+  }
+
+  .ctaRight {
+    padding-left: 24px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+    height: 60px;
+  }
+
+  .navLinks {
+    display: none;
+  }
+
+  .navTitle {
+    font-size: 16px;
+  }
+
+  .navSub {
+    display: none;
+  }
+
+  .hero {
+    min-height: 400px;
+  }
+
+  .heroContent {
+    padding: 40px 20px;
+    max-width: 100%;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .heroDesc {
+    font-size: 14px;
+  }
+
+  .heroFeatures {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* on mobile the fade goes fully opaque so text is readable */
+  .heroFadeOverlay {
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  .statsBar {
+    flex-wrap: wrap;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .statCard {
+    min-width: calc(50% - 6px);
+    flex: unset;
+    width: calc(50% - 6px);
+  }
+
+  .ctaBanner {
+    flex-direction: column;
+    padding: 28px 20px;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .ctaSeparator {
+    display: none;
+  }
+
+  .ctaRight {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .statCard {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .heroTitle {
+    font-size: 24px;
+  }
+}

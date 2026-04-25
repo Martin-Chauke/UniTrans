@@ -17,7 +17,7 @@ class IsTransportManager(BasePermission):
 
 
 class IsAdminOrManager(BasePermission):
-    """Allows access to Admin or Transport Manager users."""
+    """Allows access to Admin or Transport Manager users (not students)."""
 
     message = 'Only Admin or Transport Managers can perform this action.'
 
@@ -38,5 +38,8 @@ class IsStudent(BasePermission):
         return (
             request.user
             and request.user.is_authenticated
-            and hasattr(request.user, 'student_profile')
+            and (
+                request.user.role == User.Role.STUDENT
+                or hasattr(request.user, 'student_profile')
+            )
         )

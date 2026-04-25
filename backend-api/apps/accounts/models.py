@@ -23,6 +23,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
         ADMIN = 'Admin', 'Admin'
         TRANSPORT_MANAGER = 'TransportManager', 'Transport Manager'
+        STUDENT = 'Student', 'Student'
 
     user_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=150)
@@ -53,6 +54,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def is_admin(self):
         return self.role == self.Role.ADMIN
+
+    def is_student(self):
+        return self.role == self.Role.STUDENT
 
 
 class Student(models.Model):

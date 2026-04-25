@@ -1,0 +1,189 @@
+.page {
+  padding: 28px 32px 48px;
+  min-height: 100%;
+  background: var(--color-bg);
+}
+
+/* ── Page header ── */
+.pageHeader {
+  margin-bottom: 28px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* ── KPI stat row ── */
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.kpiCard {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kpiLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpiValue {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.kpiSub {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+/* ── Chart grid ── */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+/* ── Chart card ── */
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px 22px 16px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.cardDesc {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.chartWrap {
+  width: 100%;
+}
+
+/* ── Funnel stage bars ── */
+.funnelList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0;
+}
+
+.funnelItem {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.funnelLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.funnelCount {
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.funnelTrack {
+  height: 28px;
+  background: var(--color-bg);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.funnelBar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
+
+/* ── Loading / empty states ── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.emptyNote {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .kpiRow { grid-template-columns: repeat(2, 1fr); }
+  .grid3  { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .page   { padding: 20px 16px 40px; }
+  .kpiRow { grid-template-columns: 1fr 1fr; }
+  .grid2,
+  .grid3  { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .kpiRow { grid-template-columns: 1fr; }
+}
