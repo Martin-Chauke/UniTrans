@@ -1,0 +1,97 @@
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  flex: 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alertIcon {
+  color: var(--color-yellow);
+}
+
+.count {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--color-muted);
+  text-align: center;
+  padding: 16px 0;
+}
+
+.item {
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-left: 3px solid transparent;
+}
+
+.item.incident {
+  background: #fef2f2;
+  border-left-color: var(--color-red);
+}
+
+.item.warning {
+  background: var(--color-yellow-light);
+  border-left-color: var(--color-yellow);
+}
+
+.item.info {
+  background: var(--color-blue-light);
+  border-left-color: var(--color-primary);
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.itemTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.itemDesc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemDate {
+  font-size: 11px;
+  color: var(--color-muted);
+  margin-top: 2px;
+}

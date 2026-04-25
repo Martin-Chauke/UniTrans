@@ -1,0 +1,14 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+# Virtual environments
+venv/
+backend-api/venv/
+# Node artifacts
+node_modules/
+.npm/
+frontend/.next/
+# Logs
+*.log
+.DS_Store

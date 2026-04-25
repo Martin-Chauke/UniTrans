@@ -1,0 +1,145 @@
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewAll {
+  font-size: 13px;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.viewAll:hover {
+  text-decoration: underline;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-muted);
+  letter-spacing: 0.5px;
+  padding: 0 0 10px 0;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: 10px 0;
+  font-size: 13px;
+  color: var(--color-text);
+  border-top: 1px solid var(--color-border);
+}
+
+.table tr:first-child td {
+  border-top: none;
+}
+
+.lineName {
+  font-weight: 600;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 24px 0;
+  font-size: 13px;
+}
+
+.clickableRow {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.clickableRow:hover td {
+  background: var(--color-bg);
+}
+
+.stationBtn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.stationBtn:hover {
+  color: var(--color-primary-dark);
+}
+
+.stationsEmpty {
+  padding: 20px;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.stationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.stationsItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stationsItem:last-child {
+  border-bottom: none;
+}
+
+.stationsIndex {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stationsName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.stationsAddress {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-top: 2px;
+}

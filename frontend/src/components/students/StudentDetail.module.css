@@ -1,0 +1,247 @@
+.panel {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.id {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-top: 2px;
+  display: block;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editBtn {
+  height: 28px;
+  padding: 0 12px;
+  background: none;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editBtn:hover {
+  background: #eff6ff;
+}
+
+.deleteBtn {
+  height: 28px;
+  padding: 0 12px;
+  background: none;
+  border: 1px solid var(--color-red);
+  color: var(--color-red);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deleteBtn:hover {
+  background: #fff1f0;
+}
+
+.closeBtn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background 0.1s;
+}
+
+.closeBtn:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.editError {
+  padding: 8px 12px;
+  background: #fff1f0;
+  border: 1px solid #ffc1bd;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--color-red);
+}
+
+.editRow {
+  display: flex;
+  gap: 12px;
+}
+
+.editField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.editLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.editInput {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--color-text);
+  outline: none;
+  background: var(--color-white);
+}
+
+.editInput:focus {
+  border-color: var(--color-primary);
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+}
+
+.saveBtn {
+  height: 34px;
+  padding: 0 18px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.cancelEditBtn {
+  height: 34px;
+  padding: 0 14px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.cancelEditBtn:hover {
+  background: var(--color-bg);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.infoLabel {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.infoValue {
+  color: var(--color-text);
+  font-weight: 500;
+  text-align: right;
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+.subList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.subInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.subLine {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.subDate {
+  font-size: 11px;
+  color: var(--color-muted);
+}
