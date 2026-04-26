@@ -53,13 +53,6 @@ const RefreshIcon = () => (
   </svg>
 );
 
-const ListIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
-    <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
-  </svg>
-);
-
 const HistoryIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4.5" />
@@ -101,7 +94,6 @@ const navItems = [
   { href: "/student/subscription", label: "My Subscription", icon: <CreditCardIcon /> },
   { href: "/student/subscription-history", label: "Subscription History", icon: <ClockIcon /> },
   { href: "/student/request-change", label: "Request Line Change", icon: <RefreshIcon /> },
-  { href: "/student/requests", label: "My Requests", icon: <ListIcon /> },
   { href: "/student/assignment-history", label: "Assignment History", icon: <HistoryIcon /> },
   { href: "/student/reports", label: "Report / Support", icon: <AlertIcon /> },
   { href: "/student/profile", label: "Profile Settings", icon: <UserIcon /> },

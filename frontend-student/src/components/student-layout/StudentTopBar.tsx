@@ -86,12 +86,11 @@ export function StudentTopBar({ onMenuOpen }: Props) {
           {dark ? <SunIcon /> : <MoonIcon />}
         </button>
 
-        <Link href="/student/notifications" className={styles.notifBtn}>
+        <Link href="/student/notifications" className={styles.notifBtn} aria-label="Notifications">
           <BellIcon />
           {unreadCount > 0 && (
             <span className={styles.badge}>{unreadCount}</span>
           )}
-          <span className={styles.notifLabel}>Notifications</span>
         </Link>
 
         <div className={styles.userMenu}>
