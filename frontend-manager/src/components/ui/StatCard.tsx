@@ -9,9 +9,11 @@ interface StatCardProps {
   secondary?: { label: string; value: number | string };
   icon?: React.ReactNode;
   href?: string;
+  /** Text for the top-right link when `href` is set (default: "View all") */
+  linkLabel?: string;
 }
 
-export function StatCard({ title, value, subtitle, secondary, icon, href }: StatCardProps) {
+export function StatCard({ title, value, subtitle, secondary, icon, href, linkLabel }: StatCardProps) {
   return (
     <div className={styles.card}>
       <div className={styles.content}>
@@ -29,7 +31,7 @@ export function StatCard({ title, value, subtitle, secondary, icon, href }: Stat
         <div className={styles.iconCol}>
           {href && (
             <Link href={href} className={styles.viewAll}>
-              View all
+              {linkLabel ?? "View all"}
             </Link>
           )}
           {icon && <div className={styles.icon}>{icon}</div>}

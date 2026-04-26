@@ -47,6 +47,15 @@ const DriversIcon = () => (
   </svg>
 );
 
+const StatisticsIcon = () => (
+  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <line x1="18" y1="20" x2="18" y2="10" />
+    <line x1="12" y1="20" x2="12" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="14" />
+    <path d="M2 20h20" />
+  </svg>
+);
+
 
 export default function DashboardPage() {
   const { data: dashboard, isLoading } = useManagerDashboard();
@@ -105,6 +114,14 @@ export default function DashboardPage() {
           subtitle="Assigned"
           icon={<DriversIcon />}
           href="/drivers"
+        />
+        <StatCard
+          title="Statistics"
+          value="Analytics"
+          subtitle="Charts, funnels & KPIs"
+          icon={<StatisticsIcon />}
+          href="/statistics"
+          linkLabel="Open"
         />
       </div>
 

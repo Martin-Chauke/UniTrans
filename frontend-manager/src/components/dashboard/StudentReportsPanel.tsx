@@ -6,7 +6,9 @@ import { getStudentReports, resolveStudentReport, type StudentReportItem } from 
 import { Badge } from "@/components/ui/Badge";
 import styles from "./StudentReportsPanel.module.css";
 
-const TYPE_COLORS: Record<string, string> = {
+type ReportTypeBadge = "warning" | "incident" | "info";
+
+const TYPE_COLORS: Record<string, ReportTypeBadge> = {
   delay: "warning",
   incident: "incident",
   inquiry: "info",

@@ -54,9 +54,6 @@ const TooltipStyle = {
   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
 };
 
-// ─── Custom tooltip label formatter ──────────────────────────────────────────
-const pctFormatter = (v: number) => `${v ?? 0}%`;
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function StatisticsPage() {
   const { data: reportData, isLoading, isError } = useQuery<ReportData>({
@@ -262,10 +259,6 @@ export default function StatisticsPage() {
                   <Tooltip
                     contentStyle={TooltipStyle}
                     cursor={{ strokeDasharray: "3 3" }}
-                    formatter={(value: number, name: string) =>
-                      name === "Subscriptions" ? [value, "Active students"] : [value, name]
-                    }
-                    labelFormatter={() => ""}
                     content={({ payload }) => {
                       if (!payload?.length) return null;
                       const d = payload[0].payload as StationDensityPoint;
@@ -286,7 +279,10 @@ export default function StatisticsPage() {
                       dataKey="station"
                       position="top"
                       style={{ fontSize: 9, fill: "#374151" }}
-                      formatter={(v: string) => (v.length > 14 ? v.slice(0, 13) + "…" : v)}
+                      formatter={(label) => {
+                        const v = label == null ? "" : String(label);
+                        return v.length > 14 ? `${v.slice(0, 13)}…` : v;
+                      }}
                     />
                   </Scatter>
                 </ScatterChart>
@@ -319,9 +315,11 @@ export default function StatisticsPage() {
                     outerRadius={95}
                     innerRadius={48}
                     paddingAngle={3}
-                    label={({ incident_type, percent }) =>
-                      `${incident_type} ${(percent * 100).toFixed(0)}%`
-                    }
+                    label={(props) => {
+                      const name = String((props as { name?: string }).name ?? "");
+                      const pct = Number((props as { percent?: number }).percent ?? 0);
+                      return `${name} ${(pct * 100).toFixed(0)}%`;
+                    }}
                     labelLine={false}
                   >
                     {incidentByType.map((_, index) => (
@@ -330,7 +328,7 @@ export default function StatisticsPage() {
                   </Pie>
                   <Tooltip
                     contentStyle={TooltipStyle}
-                    formatter={(value: number) => [value, "incidents"]}
+                    formatter={(value) => [Number(value ?? 0), "incidents"]}
                   />
                   <Legend
                     iconType="circle"
@@ -407,7 +405,7 @@ export default function StatisticsPage() {
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                   <Tooltip
                     contentStyle={TooltipStyle}
-                    formatter={(value: number, name: string) => [value, name]}
+                    formatter={(value, name) => [Number(value ?? 0), String(name ?? "")]}
                   />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar dataKey="bus_capacity" name="Bus Capacity" fill={SLATE} radius={[4, 4, 0, 0]} />

@@ -1,11 +1,11 @@
 # UniTrans
 
-A full-stack university bus transport management system. The backend is a Django REST Framework API and the frontend is a Next.js application that hosts two portals in a single codebase:
+A full-stack university bus transport management system. The backend is a Django REST Framework API. The UI is split into **two Next.js applications** that both talk to the same API:
 
-- **Manager Portal** — for transport managers and admins to manage students, buses, drivers, lines, trips, incidents and subscriptions.
-- **Student Portal** — for students to view their assigned transport details, track schedules, manage subscriptions, request line changes, receive notifications, and submit support reports.
+- **Manager Portal** (`frontend-manager/`) — for transport managers and admins to manage students, buses, drivers, lines, trips, incidents, subscriptions, statistics, and reports.
+- **Student Portal** (`frontend-student/`) — for students to view assigned transport, schedules, subscriptions, line-change requests, notifications, and support reports.
 
-Both portals communicate with the same Django API over HTTP using JWT authentication. Each portal has its own login page, auth context, Axios client, and route group so sessions can coexist in the same browser tab.
+Each app uses JWT authentication with its own login flow, Axios client, and `localStorage` keys. Because the apps run on different dev ports by default, a manager and a student can be signed in at the same time without token collisions.
 
 ---
 
@@ -15,9 +15,10 @@ Both portals communicate with the same Django API over HTTP using JWT authentica
 - Python 3.12
 - PostgreSQL 14+
 
-**Frontend**
+**Frontends** (one install per app directory)
 - Node.js 18+
 - npm 9+
+- Next.js 16 (see each `frontend-*/package.json` for exact framework versions)
 
 ---
 
@@ -47,33 +48,46 @@ UniTrans/
 │       ├── incidents/          # Incident
 │       ├── notifications/      # Notification / Alert
 │       └── reports/            # Aggregated reporting
-└── frontend/                   # Next.js (App Router) — both portals
+├── frontend-manager/           # Next.js — Manager Portal (default dev port **3000**)
+│   ├── package.json
+│   ├── next.config.ts
+│   └── src/
+│       ├── app/
+│       │   ├── layout.tsx
+│       │   ├── page.tsx                # Public landing / entry
+│       │   ├── login/
+│       │   ├── register/
+│       │   └── (dashboard)/            # Auth-guarded manager UI
+│       │       ├── dashboard/
+│       │       ├── statistics/
+│       │       ├── students/
+│       │       ├── buses/
+│       │       ├── drivers/
+│       │       ├── lines-trips/
+│       │       ├── incidents/
+│       │       ├── schedule/
+│       │       ├── subscription-history/
+│       │       ├── settings/
+│       │       └── search/
+│       ├── api/
+│       │   ├── client.ts               # Manager Axios + JWT refresh
+│       │   └── modules/                # auth, accounts, buses, drivers, lines, …
+│       ├── components/
+│       ├── context/
+│       │   └── AuthContext.tsx
+│       └── providers/
+└── frontend-student/           # Next.js — Student Portal (default dev port **3001**)
     ├── package.json
     ├── next.config.ts
-    ├── tsconfig.json
     └── src/
         ├── app/
-        │   ├── layout.tsx              # Root layout (both providers)
-        │   ├── page.tsx                # Public landing page
-        │   ├── login/                  # Manager login
-        │   ├── register/               # Manager registration
+        │   ├── layout.tsx
+        │   ├── page.tsx                # Redirects to /student/landing
         │   ├── student/
-        │   │   ├── login/              # Student login
-        │   │   └── register/           # Student registration
-        │   ├── (dashboard)/            # Manager Portal (auth-guarded)
-        │   │   ├── layout.tsx
-        │   │   ├── dashboard/
-        │   │   ├── students/
-        │   │   ├── buses/
-        │   │   ├── drivers/
-        │   │   ├── lines-trips/
-        │   │   ├── incidents/
-        │   │   ├── schedule/
-        │   │   ├── subscription-history/
-        │   │   ├── settings/
-        │   │   └── search/
-        │   └── (student-portal)/       # Student Portal (auth-guarded)
-        │       ├── layout.tsx
+        │   │   ├── landing/            # Marketing / entry for students
+        │   │   ├── login/
+        │   │   └── register/
+        │   └── (student-portal)/       # Auth-guarded student UI
         │       └── student/
         │           ├── dashboard/
         │           ├── transport/
@@ -88,32 +102,12 @@ UniTrans/
         │           ├── reports/
         │           └── profile/
         ├── api/
-        │   ├── client.ts               # Manager Axios instance (access_token)
-        │   ├── student-client.ts       # Student Axios instance (student_access_token)
-        │   └── modules/
-        │       ├── auth/               # Login, register, token refresh
-        │       ├── accounts/           # Manager student/driver CRUD
-        │       ├── student/            # All student self-service endpoints
-        │       ├── buses/
-        │       ├── drivers/
-        │       ├── lines/
-        │       ├── schedules/
-        │       ├── trips/
-        │       ├── subscriptions/
-        │       ├── incidents/
-        │       └── notifications/
+        │   ├── student-client.ts       # Student Axios + JWT refresh
+        │   └── modules/student/        # Student-facing API helpers
         ├── components/
-        │   ├── layout/                 # Manager Sidebar + TopBar
-        │   └── student-layout/         # Student Sidebar + TopBar
         ├── context/
-        │   ├── AuthContext.tsx         # Manager auth (access_token)
-        │   └── StudentAuthContext.tsx  # Student auth (student_access_token)
-        ├── hooks/
-        │   ├── useStudents.ts
-        │   ├── useStudentPhoto.ts      # Profile photo (localStorage)
-        │   └── ...
+        │   └── StudentAuthContext.tsx
         └── providers/
-            └── Providers.tsx           # QueryClient + AuthProvider + StudentAuthProvider
 ```
 
 ---
@@ -204,40 +198,76 @@ The API will be available at **http://localhost:8000**.
 
 ## Frontend Setup
 
-### 1. Navigate to the frontend directory
+The manager and student apps are **separate packages**. Install and run each from its own directory (in two terminals if you need both at once).
+
+### Manager Portal (`frontend-manager/`)
+
+1. **Go to the app folder**
 
 ```bash
-cd frontend
+cd frontend-manager
 ```
 
-### 2. Install dependencies
+2. **Install dependencies**
 
 ```bash
 npm install
 ```
 
-### 3. Configure environment variables
+3. **Environment**
 
-Create a `.env.local` file inside `frontend/`:
+Create `frontend-manager/.env.local`:
 
 ```
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-If omitted, the Axios clients default to `http://localhost:8000`.
+If omitted, the API client defaults to `http://localhost:8000`.
 
-### 4. Run development server
+4. **Dev server** (port **3000** per `package.json`)
 
 ```bash
 npm run dev
 ```
 
-| Portal | URL |
-|--------|-----|
-| Manager Portal | http://localhost:3000/login |
-| Student Portal | http://localhost:3000/student/login |
+| Page | URL |
+|------|-----|
+| Public landing | http://localhost:3000/ |
+| Manager login | http://localhost:3000/login |
+| Manager register | http://localhost:3000/register |
 
-### Available scripts
+### Student Portal (`frontend-student/`)
+
+1. **Go to the app folder**
+
+```bash
+cd frontend-student
+```
+
+2. **Install dependencies**
+
+```bash
+npm install
+```
+
+3. **Environment**
+
+Create `frontend-student/.env.local` with the same variable as above if your API is not on `http://localhost:8000`.
+
+4. **Dev server** (port **3001** per `package.json`)
+
+```bash
+npm run dev
+```
+
+| Page | URL |
+|------|-----|
+| Root (redirects) | http://localhost:3001/ → `/student/landing` |
+| Student landing | http://localhost:3001/student/landing |
+| Student login | http://localhost:3001/student/login |
+| Student register | http://localhost:3001/student/register |
+
+### Available scripts (each app)
 
 | Script | Command | Description |
 |--------|---------|-------------|
@@ -266,10 +296,10 @@ Visit http://localhost:8000/admin/ and log in with your superuser credentials.
 
 ### Registration & Login
 
-Students register via `POST /api/auth/register/` (no tokens returned) and then log in at `/student/login`. On successful login (`POST /api/auth/login/`) the API returns a JWT pair which is stored in `localStorage` under the keys `student_access_token` and `student_refresh_token` — separate from the manager's `access_token` so both sessions can run side by side.
+Students register via `POST /api/auth/register/` (no tokens returned) and then log in at `/student/login` on the **student app** (port 3001 in development). On successful login (`POST /api/auth/login/`) the API returns a JWT pair which is stored in `localStorage` under the keys `student_access_token` and `student_refresh_token` — separate from the manager's `access_token` so both sessions can run side by side when using the two apps together.
 
 ```
-Student opens /student/register
+Student opens /student/register (frontend-student)
   → fills registration form (name, email, reg. number, password)
   → POST /api/auth/register/  →  student record created
   → redirected to /student/login
@@ -287,6 +317,7 @@ Every subsequent API call from the student portal attaches `Authorization: Beare
 
 | Route | What the student sees | API calls |
 |---|---|---|
+| `/student/landing` | Public entry / marketing before login | (static / navigation to login & register) |
 | `/student/dashboard` | Overview of current line, next bus, subscription status, unread alerts, transport details, today's schedule, station map, request widget, history | `GET /api/students/me/dashboard/`, active subscription, timetable, notifications |
 | `/student/transport` | Full transport assignment: line, seat, pickup station, subscription dates | `GET /api/students/me/`, `GET /api/students/me/seat/`, active subscription |
 | `/student/schedule` | Timetable for the student's line, filterable by day | `GET /api/lines/{id}/timetable/` |
@@ -316,15 +347,15 @@ The transport manager controls everything that affects a student's experience. T
 
 ### Authentication Isolation
 
-Both portals share the same Django backend and the same `/api/auth/login/` endpoint. The frontend keeps the sessions separate:
+Both apps share the same Django backend and the same `/api/auth/login/` endpoint. Tokens and React context stay separate per app:
 
-| | Manager Portal | Student Portal |
+| | Manager Portal (`frontend-manager`) | Student Portal (`frontend-student`) |
 |---|---|---|
 | Axios instance | `src/api/client.ts` | `src/api/student-client.ts` |
 | localStorage key (access) | `access_token` | `student_access_token` |
 | localStorage key (refresh) | `refresh_token` | `student_refresh_token` |
 | React context | `AuthContext` | `StudentAuthContext` |
-| Auth guard | `(dashboard)/layout.tsx` → `/login` | `(student-portal)/layout.tsx` → `/student/login` |
+| Auth guard | `app/(dashboard)/layout.tsx` → `/login` | `app/(student-portal)/layout.tsx` → `/student/login` |
 
 ---
 
