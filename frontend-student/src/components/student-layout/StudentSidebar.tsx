@@ -88,13 +88,13 @@ const ChevronIcon = ({ collapsed }: { collapsed: boolean }) => (
 
 const navItems = [
   { href: "/student/dashboard", label: "Dashboard", icon: <HomeIcon /> },
-  { href: "/student/transport", label: "My Transport Details", icon: <BusIcon /> },
+  { href: "/student/transport", label: "Transport Details", icon: <BusIcon /> },
   { href: "/student/schedule", label: "View Schedule", icon: <CalendarIcon /> },
-  { href: "/student/station-line", label: "My Station & Line", icon: <MapIcon /> },
-  { href: "/student/subscription", label: "My Subscription", icon: <CreditCardIcon /> },
+ // { href: "/student/station-line", label: "My Station & Line", icon: <MapIcon /> },
+  { href: "/student/subscription", label: "Subscription", icon: <CreditCardIcon /> },
   { href: "/student/subscription-history", label: "Subscription History", icon: <ClockIcon /> },
   { href: "/student/request-change", label: "Request Line Change", icon: <RefreshIcon /> },
-  { href: "/student/assignment-history", label: "Assignment History", icon: <HistoryIcon /> },
+ // { href: "/student/assignment-history", label: "Assignment History", icon: <HistoryIcon /> },
   { href: "/student/reports", label: "Report / Support", icon: <AlertIcon /> },
   { href: "/student/profile", label: "Profile Settings", icon: <UserIcon /> },
 ];

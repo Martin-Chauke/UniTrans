@@ -288,7 +288,7 @@ export default function StudentLandingPage() {
             UNITRANS makes your daily commute easy, reliable and safe. Access schedules, manage your subscription, and stay updated – all in one place.
           </p>
           <div className={styles.heroCtas}>
-          {/*<Link href="/student/login" className={styles.heroCtaPrimary}>
+            {/*<Link href="/student/login" className={styles.heroCtaPrimary}>
               <LoginIcon size={15} color="#fff" />
               Student Login
             </Link>*/}
