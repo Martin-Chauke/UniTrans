@@ -31,7 +31,7 @@ export default function StationLinePage() {
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>My Station & Line</h1>
+        <h1 className={styles.pageTitle}> Station & Line</h1>
         <p className={styles.pageSub}>Your assigned line route and station information</p>
       </div>
 

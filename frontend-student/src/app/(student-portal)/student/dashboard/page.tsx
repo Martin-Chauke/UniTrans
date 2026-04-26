@@ -259,7 +259,7 @@ export default function StudentDashboardPage() {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <MapPinIcon />
-            <span>My Station & Line</span>
+            <span>Station & Line</span>
             <Link href="/student/station-line" className={styles.viewAll}>View route</Link>
           </div>
           <div className={styles.stationInfo}>
@@ -303,7 +303,7 @@ export default function StudentDashboardPage() {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <ReportIcon />
-            <span>My Requests</span>
+            <span>Requests</span>
             <Link href="/student/requests" className={styles.viewAll}>View all</Link>
           </div>
           {history.length === 0 ? (

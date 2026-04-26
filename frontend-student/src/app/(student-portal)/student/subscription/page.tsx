@@ -29,7 +29,7 @@ export default function SubscriptionPage() {
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>My Subscription</h1>
+        <h1 className={styles.pageTitle}> Subscription</h1>
         <p className={styles.pageSub}>Manage your active transport subscription</p>
       </div>
 
