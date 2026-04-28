@@ -167,7 +167,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen }: SidebarProps) {
         })}
       </nav>
 
-      {!collapsed && <div className={styles.version}>Version 2.0</div>}
+      {!collapsed && <div className={styles.version}>unitr@ns</div>}
     </aside>
   );
 }
