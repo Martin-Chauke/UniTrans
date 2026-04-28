@@ -22,7 +22,10 @@ export type NotificationType =
   | "incident"
   | "assignment_conflict"
   | "capacity_warning"
-  | "general";
+  | "general"
+  | "student_report_submitted"
+  | "student_line_changed"
+  | "report_resolved";
 
 export type UserRole = "Admin" | "TransportManager" | "Student";
 
@@ -267,6 +270,13 @@ export interface PatchedBusRequest {
   status?: BusStatus;
 }
 
+export interface BusAssignmentCapacityWarning {
+  warning: boolean;
+  message?: string | null;
+  student_count: number;
+  bus_capacity: number;
+}
+
 export interface BusAssignment {
   bus_assignment_id: number;
   bus: number;
@@ -277,7 +287,7 @@ export interface BusAssignment {
   end_date?: string | null;
   notes?: string;
   is_active: boolean;
-  capacity_warning: string | { warning: boolean; message?: string; student_count?: number; bus_capacity?: number };
+  capacity_warning: BusAssignmentCapacityWarning;
 }
 
 export interface BusAssignmentRequest {
@@ -421,6 +431,7 @@ export interface Incident {
   resolved?: boolean;
   trip: number;
   trip_detail: Trip;
+  show_on_manager_dashboard_alerts?: boolean;
 }
 
 export interface IncidentRequest {
@@ -453,6 +464,9 @@ export interface Notification {
   is_read?: boolean;
   created_at: string;
   student: number;
+  student_name?: string;
+  student_email?: string;
+  student_registration_number?: string;
 }
 
 export interface PatchedNotificationRequest {

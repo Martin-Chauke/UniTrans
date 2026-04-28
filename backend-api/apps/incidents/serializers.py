@@ -14,8 +14,9 @@ class IncidentSerializer(serializers.ModelSerializer):
         fields = [
             'incident_id', 'name', 'incident_type', 'incident_type_display',
             'description', 'reported_at', 'resolved', 'trip', 'trip_detail',
+            'show_on_manager_dashboard_alerts',
         ]
-        read_only_fields = ['incident_id', 'reported_at']
+        read_only_fields = ['incident_id', 'reported_at', 'show_on_manager_dashboard_alerts']
 
 
 class IncidentResolveSerializer(serializers.Serializer):

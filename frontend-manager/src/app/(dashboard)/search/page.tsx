@@ -104,7 +104,7 @@ function SearchContent() {
                 <span className={styles.resultSub}>{s.email}</span>
               </div>
               <div className={styles.resultMeta}>
-                <span className={styles.resultId}>STU{String(s.student_id).padStart(3, "0")}</span>
+                <span className={styles.resultId}>{s.registration_number}</span>
                 <Badge variant={s.user?.is_active !== false ? "active" : "expired"}>
                   {s.user?.is_active !== false ? "active" : "inactive"}
                 </Badge>

@@ -171,6 +171,28 @@
   color: var(--color-muted);
 }
 
+.capacityCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.capacityHint {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.capacityHintNear {
+  color: var(--color-yellow-dark, #b45309);
+}
+
+.capacityHintOver {
+  color: var(--color-red);
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .pageHeader { flex-direction: column; gap: 12px; align-items: flex-start; }

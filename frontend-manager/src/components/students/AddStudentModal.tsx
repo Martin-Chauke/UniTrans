@@ -122,7 +122,7 @@ export function AddStudentModal({ open, onClose }: AddStudentModalProps) {
         <div className={styles.field}>
           <label className={styles.label}>Registration Number <span className={styles.required}>*</span></label>
           <input type="text" className={styles.input} value={form.registration_number}
-            onChange={(e) => setForm((f) => ({ ...f, registration_number: e.target.value }))} placeholder="e.g. STU006" />
+            onChange={(e) => setForm((f) => ({ ...f, registration_number: e.target.value }))} placeholder="e.g. REG-2024-001" />
         </div>
 
         <div className={styles.field}>

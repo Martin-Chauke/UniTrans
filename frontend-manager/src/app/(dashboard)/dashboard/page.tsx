@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { StatCard } from "@/components/ui/StatCard";
 import { ActionCenter } from "@/components/dashboard/ActionCenter";
 import { PendingAlerts } from "@/components/dashboard/PendingAlerts";
@@ -9,7 +10,7 @@ import { ReportIncidentModal } from "@/components/incidents/ReportIncidentModal"
 import { QuickScheduleModal } from "@/components/schedule/QuickScheduleModal";
 import { AddStudentModal } from "@/components/students/AddStudentModal";
 import { AddDriverModal } from "@/components/drivers/AddDriverModal";
-import { StudentReportsPanel } from "@/components/dashboard/StudentReportsPanel";
+import { getStudentReports, type StudentReportItem } from "@/api/modules/reports/reports.api";
 import { useManagerDashboard } from "@/hooks/useDashboard";
 import { useSchedules } from "@/hooks/useSchedules";
 import { useStudents } from "@/hooks/useStudents";
@@ -61,6 +62,18 @@ export default function DashboardPage() {
   const { data: dashboard, isLoading } = useManagerDashboard();
   const { data: schedulesData } = useSchedules();
   const { data: studentsData } = useStudents();
+  const { data: openReports = [], isLoading: openReportsLoading } = useQuery<StudentReportItem[]>({
+    queryKey: ["manager-student-reports", "open"],
+    queryFn: async () => {
+      const res = await getStudentReports("open");
+      const d = res.data as unknown;
+      if (Array.isArray(d)) return d;
+      if (d && typeof d === "object" && "results" in (d as object)) {
+        return (d as { results: StudentReportItem[] }).results;
+      }
+      return [];
+    },
+  });
 
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [addDriverOpen, setAddDriverOpen] = useState(false);
@@ -126,7 +139,7 @@ export default function DashboardPage() {
       </div>
 
       <div className={styles.midRow}>
-        <PendingAlerts incidents={alerts} />
+        <PendingAlerts incidents={alerts} openReports={openReports} reportsLoading={openReportsLoading} />
         <ActionCenter
           onAddStudent={() => setAddStudentOpen(true)}
           onAddDriver={() => setAddDriverOpen(true)}
@@ -136,8 +149,6 @@ export default function DashboardPage() {
       </div>
 
       <RecentSchedules schedules={schedules} onQuickSchedule={() => setQuickScheduleOpen(true)} />
-
-      <StudentReportsPanel />
 
       <AddStudentModal open={addStudentOpen} onClose={() => setAddStudentOpen(false)} />
       <AddDriverModal open={addDriverOpen} onClose={() => setAddDriverOpen(false)} />

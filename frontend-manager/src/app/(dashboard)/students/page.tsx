@@ -94,7 +94,7 @@ function StudentsContent() {
                   >
                     <div className={styles.itemInfo}>
                       <span className={styles.itemName}>{s.first_name} {s.last_name}</span>
-                      <span className={styles.itemId}>STU{String(s.student_id).padStart(3, "0")}</span>
+                      <span className={styles.itemId}>{s.registration_number}</span>
                       <span className={styles.itemLine}>{s.email}</span>
                     </div>
                     <Badge variant={s.user?.is_active !== false ? "active" : "expired"}>

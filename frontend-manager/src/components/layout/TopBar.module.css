@@ -234,6 +234,25 @@
   border: 1px solid var(--color-border);
 }
 
+.notifBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.notifMeta {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+  line-height: 1.35;
+}
+
+.notifText {
+  font-size: 13px;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
 .notifMessage {
   font-size: 13px;
   color: var(--color-text);

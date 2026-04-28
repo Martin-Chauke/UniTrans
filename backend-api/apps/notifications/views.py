@@ -7,6 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.accounts.permissions import IsAdminOrManager
 
+from .constants import MANAGER_ONLY_NOTIFICATION_TYPES
 from .models import Notification
 from .serializers import NotificationSerializer
 
@@ -37,10 +38,18 @@ class NotificationViewSet(ModelViewSet):
         user = self.request.user
         try:
             student = user.student_profile
-            queryset = Notification.objects.filter(student=student).order_by('-created_at')
+            queryset = (
+                Notification.objects.filter(student=student)
+                .exclude(notification_type__in=MANAGER_ONLY_NOTIFICATION_TYPES)
+                .select_related('student')
+                .order_by('-created_at')
+            )
         except Exception:
-            # Manager sees all notifications
-            queryset = Notification.objects.all().order_by('-created_at')
+            queryset = (
+                Notification.objects.filter(notification_type__in=MANAGER_ONLY_NOTIFICATION_TYPES)
+                .select_related('student')
+                .order_by('-created_at')
+            )
 
         filter_param = self.request.query_params.get('filter', 'all')
         if filter_param == 'unread':

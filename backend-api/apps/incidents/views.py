@@ -4,7 +4,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from apps.accounts.models import Student
 from apps.accounts.permissions import IsAdminOrManager
+from apps.notifications.models import Notification
+from apps.trips.models import Trip
 
 from .models import Incident
 from .serializers import IncidentResolveSerializer, IncidentSerializer
@@ -26,16 +29,24 @@ class IncidentViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         incident = serializer.save()
-        # Notify students affected by the incident's trip
-        trip = incident.trip
-        affected_students = trip.seat_assignments.select_related('student').values_list('student', flat=True)
-        from apps.accounts.models import Student
-        from apps.notifications.models import Notification
-        for student in Student.objects.filter(pk__in=affected_students):
+        trip = Trip.objects.select_related('schedule__line').get(pk=incident.trip_id)
+        line = trip.schedule.line
+        trip_ref = f'TRP{trip.trip_id:03d}'
+        line_name = line.name
+
+        students_on_line = Student.objects.filter(
+            subscriptions__line=line,
+            subscriptions__is_active=True,
+        ).distinct()
+
+        message = (
+            f'Incident reported on line "{line_name}" for trip {trip_ref}: {incident.name}.'
+        )
+        for student in students_on_line:
             Notification.objects.create(
                 student=student,
                 notification_type='incident',
-                message=f'Incident reported on your trip ({trip.schedule.line.name}): {incident.name}',
+                message=message,
             )
 
     @extend_schema(

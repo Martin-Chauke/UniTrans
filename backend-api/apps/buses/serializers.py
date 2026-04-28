@@ -30,21 +30,25 @@ class BusAssignmentSerializer(serializers.ModelSerializer):
         return obj.is_active()
 
     def get_capacity_warning(self, obj):
-        """Warn if bus capacity is below the count of active student subscriptions on this line."""
+        """Line load vs bus capacity; always returns counts for UI. warning=True if over or near (90%+)."""
         student_count = obj.line.subscriptions.filter(is_active=True).count()
         bus_capacity = obj.bus.capacity
+        base = {
+            'student_count': student_count,
+            'bus_capacity': bus_capacity,
+            'warning': False,
+            'message': None,
+        }
         if student_count > bus_capacity:
             return {
+                **base,
                 'warning': True,
                 'message': f'Capacity exceeded: {student_count} students, bus capacity {bus_capacity}',
-                'student_count': student_count,
-                'bus_capacity': bus_capacity,
             }
-        elif student_count >= bus_capacity * 0.9:
+        if bus_capacity > 0 and student_count >= bus_capacity * 0.9:
             return {
+                **base,
                 'warning': True,
                 'message': f'Near capacity: {student_count}/{bus_capacity} students',
-                'student_count': student_count,
-                'bus_capacity': bus_capacity,
             }
-        return {'warning': False}
+        return base

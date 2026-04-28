@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import { useManagerNotifications, useMarkAllNotificationsRead, useMarkNotificationRead } from "@/hooks/useNotifications";
+import type { Notification } from "@/api/types";
 import styles from "./TopBar.module.css";
 
 const PROFILE_IMAGE_KEY = "unitrans_profile_image";
@@ -21,6 +22,11 @@ function timeAgo(dateStr: string) {
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
   return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function managerNotificationMeta(n: Notification) {
+  const who = [n.student_name, n.student_email].filter(Boolean).join(" · ");
+  return [who, n.notification_type_display].filter(Boolean).join(" · ");
 }
 
 export function TopBar({ alertCount = 0, onMenuToggle }: TopBarProps) {
@@ -197,7 +203,9 @@ export function TopBar({ alertCount = 0, onMenuToggle }: TopBarProps) {
                 {notifications.length === 0 ? (
                   <p className={styles.notifEmpty}>No notifications</p>
                 ) : (
-                  notifications.map((n) => (
+                  notifications.map((n) => {
+                    const meta = managerNotificationMeta(n);
+                    return (
                     <div
                       key={n.notification_id}
                       className={`${styles.notifItem} ${!n.is_read ? styles.notifItemUnread : ""}`}
@@ -206,12 +214,14 @@ export function TopBar({ alertCount = 0, onMenuToggle }: TopBarProps) {
                       }}
                     >
                       <span className={`${styles.notifDot} ${n.is_read ? styles.notifDotRead : ""}`} />
-                      <div style={{ flex: 1 }}>
-                        <div className={styles.notifMessage}>{n.message}</div>
+                      <div className={styles.notifBody}>
+                        {meta ? <div className={styles.notifMeta}>{meta}</div> : null}
+                        <div className={styles.notifText}>{n.message}</div>
                         <span className={styles.notifTime}>{timeAgo(n.created_at)}</span>
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -307,7 +317,9 @@ export function TopBar({ alertCount = 0, onMenuToggle }: TopBarProps) {
                   {notifications.length === 0 ? (
                     <p className={styles.notifEmpty}>No notifications</p>
                   ) : (
-                    notifications.map((n) => (
+                    notifications.map((n) => {
+                      const meta = managerNotificationMeta(n);
+                      return (
                       <div
                         key={n.notification_id}
                         className={`${styles.notifItem} ${!n.is_read ? styles.notifItemUnread : ""}`}
@@ -316,12 +328,14 @@ export function TopBar({ alertCount = 0, onMenuToggle }: TopBarProps) {
                         }}
                       >
                         <span className={`${styles.notifDot} ${n.is_read ? styles.notifDotRead : ""}`} />
-                        <div style={{ flex: 1 }}>
-                          <div className={styles.notifMessage}>{n.message}</div>
+                        <div className={styles.notifBody}>
+                          {meta ? <div className={styles.notifMeta}>{meta}</div> : null}
+                          <div className={styles.notifText}>{n.message}</div>
                           <span className={styles.notifTime}>{timeAgo(n.created_at)}</span>
                         </div>
                       </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               )}

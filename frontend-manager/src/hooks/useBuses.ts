@@ -28,6 +28,7 @@ export function useCreateBus() {
     mutationFn: (data: BusRequest) => busesApi.managerCreateBus(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buses"] });
+      queryClient.invalidateQueries({ queryKey: ["bus-assignments"] });
     },
   });
 }
@@ -50,6 +51,7 @@ export function usePatchBus() {
       busesApi.managerPatchBus(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buses"] });
+      queryClient.invalidateQueries({ queryKey: ["bus-assignments"] });
     },
   });
 }
@@ -60,6 +62,7 @@ export function useDeleteBus() {
     mutationFn: (id: number) => busesApi.managerDeleteBus(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buses"] });
+      queryClient.invalidateQueries({ queryKey: ["bus-assignments"] });
       queryClient.invalidateQueries({ queryKey: ["drivers"] });
     },
   });

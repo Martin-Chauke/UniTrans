@@ -176,12 +176,17 @@ class StudentDashboardView(APIView):
             return Response({'detail': 'No student profile found.'}, status=status.HTTP_404_NOT_FOUND)
 
         active_sub = student.subscriptions.filter(is_active=True).first()
-        unread_count = student.notifications.filter(is_read=False).count()
+        from apps.notifications.constants import MANAGER_ONLY_NOTIFICATION_TYPES
+
+        student_notif_qs = student.notifications.exclude(
+            notification_type__in=MANAGER_ONLY_NOTIFICATION_TYPES
+        )
+        unread_count = student_notif_qs.filter(is_read=False).count()
         seat = student.seat_assignments.select_related('trip', 'row').filter(
             trip__status='in_progress'
         ).first()
 
-        recent_notifications = student.notifications.order_by('-created_at')[:5]
+        recent_notifications = student_notif_qs.order_by('-created_at')[:5]
         from apps.notifications.serializers import NotificationSerializer
         notifications_data = NotificationSerializer(recent_notifications, many=True).data
 
@@ -222,7 +227,11 @@ class ManagerDashboardView(APIView):
         open_incidents = Incident.objects.filter(resolved=False).count()
         total_drivers = Driver.objects.count()
 
-        unresolved_incidents = Incident.objects.filter(resolved=False).order_by('-reported_at')[:5]
+        unresolved_incidents = (
+            Incident.objects.filter(resolved=False, show_on_manager_dashboard_alerts=True)
+            .select_related('trip__schedule__line')
+            .order_by('-reported_at')[:5]
+        )
         from apps.incidents.serializers import IncidentSerializer
         incidents_data = IncidentSerializer(unresolved_incidents, many=True).data
 

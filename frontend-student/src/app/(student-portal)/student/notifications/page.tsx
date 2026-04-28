@@ -22,6 +22,9 @@ const TYPE_LABELS: Record<string, string> = {
   assignment_conflict: "Conflict",
   capacity_warning: "Capacity Warning",
   general: "General",
+  report_resolved: "Report resolved",
+  student_report_submitted: "Report submitted",
+  student_line_changed: "Line change",
 };
 
 export default function NotificationsPage() {

@@ -114,12 +114,21 @@ class ChangeLineView(APIView):
                 reason=reason,
             )
 
-        # Notify student
         from apps.notifications.models import Notification
+
         Notification.objects.create(
             student=student,
-            notification_type='line_change',
+            notification_type=Notification.NotificationType.LINE_CHANGE,
             message=f'Your subscription has been changed from {old_line.name} to {new_line.name}.',
+        )
+        who = f'{student.first_name} {student.last_name}'.strip()
+        Notification.objects.create(
+            student=student,
+            notification_type=Notification.NotificationType.STUDENT_LINE_CHANGED,
+            message=(
+                f'From: {who} ({student.email}) — Requested line change from "{old_line.name}" '
+                f'to "{new_line.name}".'
+            ),
         )
 
         return Response(SubscriptionSerializer(new_subscription).data)

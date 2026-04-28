@@ -14,6 +14,9 @@ class Notification(models.Model):
         ASSIGNMENT_CONFLICT = 'assignment_conflict', 'Assignment Conflict'
         CAPACITY_WARNING = 'capacity_warning', 'Capacity Warning'
         GENERAL = 'general', 'General'
+        STUDENT_REPORT_SUBMITTED = 'student_report_submitted', 'Student Report Submitted'
+        STUDENT_LINE_CHANGED = 'student_line_changed', 'Student Line Changed'
+        REPORT_RESOLVED = 'report_resolved', 'Report Resolved'
 
     notification_id = models.AutoField(primary_key=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='notifications')

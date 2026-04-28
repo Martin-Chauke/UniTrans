@@ -18,6 +18,10 @@ class Incident(models.Model):
     description = models.TextField()
     reported_at = models.DateTimeField(default=timezone.now)
     resolved = models.BooleanField(default=False)
+    show_on_manager_dashboard_alerts = models.BooleanField(
+        default=False,
+        help_text='If true, unresolved incident may appear in manager dashboard Pending Alerts.',
+    )
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='incidents')
 
     class Meta:

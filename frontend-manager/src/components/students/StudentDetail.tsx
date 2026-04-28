@@ -16,7 +16,6 @@ interface StudentDetailPanelProps {
 
 export function StudentDetailPanel({ student, onClose, onDeleted }: StudentDetailPanelProps) {
   const fullName = `${student.first_name} ${student.last_name}`;
-  const studentId = `STU${String(student.student_id).padStart(3, "0")}`;
   const isActive = student.user?.is_active !== false;
 
   const { data: subscriptions, isLoading: subsLoading } = useStudentSubscriptions(student.student_id);
@@ -98,7 +97,7 @@ export function StudentDetailPanel({ student, onClose, onDeleted }: StudentDetai
       <div className={styles.panelHeader}>
         <div>
           <h2 className={styles.name}>{editing ? `${form.first_name} ${form.last_name}` : fullName}</h2>
-          <span className={styles.id}>{studentId}</span>
+          <span className={styles.id}>{editing ? form.registration_number : student.registration_number}</span>
         </div>
         <div className={styles.headerActions}>
           {!editing && (

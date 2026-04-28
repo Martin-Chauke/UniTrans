@@ -9,8 +9,33 @@ import { CapacityBar } from "@/components/ui/CapacityBar";
 import { AssignBusModal } from "@/components/buses/AssignBusModal";
 import { AddBusModal } from "@/components/buses/AddBusModal";
 import { EditBusModal } from "@/components/buses/EditBusModal";
-import type { Bus } from "@/api/types";
+import type { Bus, BusAssignment } from "@/api/types";
 import styles from "./buses.module.css";
+
+/** Active line subscriptions vs bus capacity from assignment API (matches backend). */
+function lineLoadFromAssignment(assignment: BusAssignment | undefined, busCapacity: number) {
+  if (!assignment) {
+    return {
+      current: 0,
+      max: busCapacity,
+      over: false,
+      near: false,
+      message: null as string | null,
+    };
+  }
+  const cw = assignment.capacity_warning;
+  const current = cw.student_count;
+  const max = cw.bus_capacity > 0 ? cw.bus_capacity : busCapacity;
+  const over = current > max;
+  const near = Boolean(cw.warning) && !over;
+  return {
+    current,
+    max,
+    over,
+    near,
+    message: cw.message ?? null,
+  };
+}
 
 export default function BusesPage() {
   const { data: busesData, isLoading } = useBuses();
@@ -101,13 +126,14 @@ export default function BusesPage() {
                 <th>DRIVER</th>
                 <th>LINE</th>
                 <th>STATUS</th>
-                <th>CAPACITY</th>
+                <th>LINE LOAD</th>
                 <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((bus) => {
                 const assignment = getAssignment(bus.bus_id);
+                const load = lineLoadFromAssignment(assignment, bus.capacity);
                 return (
                   <tr key={bus.bus_id}>
                     <td className={styles.busId}>{bus.registration_number}</td>
@@ -120,7 +146,24 @@ export default function BusesPage() {
                       </Badge>
                     </td>
                     <td>
-                      <CapacityBar current={0} max={bus.capacity} />
+                      <div className={styles.capacityCell}>
+                        <CapacityBar current={load.current} max={load.max} />
+                        {assignment && load.over && (
+                          <span className={`${styles.capacityHint} ${styles.capacityHintOver}`} title={load.message ?? ""}>
+                            Over capacity (line subscribers)
+                          </span>
+                        )}
+                        {assignment && load.near && (
+                          <span className={`${styles.capacityHint} ${styles.capacityHintNear}`} title={load.message ?? ""}>
+                            Near capacity (90%+)
+                          </span>
+                        )}
+                        {!assignment && (
+                          <span className={styles.capacityHint} style={{ color: "var(--color-muted)", fontWeight: 500 }}>
+                            Assign to a line to track load
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td>
                       <div className={styles.actionGroup}>

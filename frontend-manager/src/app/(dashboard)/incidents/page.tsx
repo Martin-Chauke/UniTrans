@@ -42,11 +42,14 @@ export default function IncidentsPage() {
   const incidents = data?.results ?? [];
 
   const filtered = useMemo(() => {
+    const q = search.toLowerCase();
     return incidents.filter((inc) => {
+      const lineName = (inc.trip_detail?.line_name ?? "").toLowerCase();
       const matchSearch =
-        `TRP${String(inc.trip).padStart(3, "0")}`.toLowerCase().includes(search.toLowerCase()) ||
-        inc.description.toLowerCase().includes(search.toLowerCase()) ||
-        inc.name.toLowerCase().includes(search.toLowerCase());
+        `TRP${String(inc.trip).padStart(3, "0")}`.toLowerCase().includes(q) ||
+        inc.description.toLowerCase().includes(q) ||
+        inc.name.toLowerCase().includes(q) ||
+        lineName.includes(q);
       const matchType = typeFilter === "all" || inc.incident_type === typeFilter;
       return matchSearch && matchType;
     });
@@ -66,7 +69,7 @@ export default function IncidentsPage() {
 
       <div className={styles.tableCard}>
         <div className={styles.filters}>
-          <SearchInput value={search} onChange={setSearch} placeholder="Search by trip ID or description..." />
+          <SearchInput value={search} onChange={setSearch} placeholder="Search by trip ID, line name, or description..." />
           <select className={styles.select} value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}>
             <option value="all">All Types</option>
@@ -83,7 +86,11 @@ export default function IncidentsPage() {
         ) : (
           <div className={styles.list}>
             {filtered.map((inc) => {
-              const tripLabel = `Trp: TRP${String(inc.trip).padStart(3, "0")}`;
+              const lineName = inc.trip_detail?.line_name?.trim() ?? "";
+              const tripId = `TRP${String(inc.trip).padStart(3, "0")}`;
+              const tripLabel = lineName
+                ? `Trip: ${tripId} — ${lineName}`
+                : `Trip: ${tripId}`;
               return (
                 <div key={inc.incident_id} className={styles.item}>
                   <div className={styles.iconCell}>

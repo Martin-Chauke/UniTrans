@@ -17,6 +17,8 @@ from apps.lines.models import Line
 from apps.subscriptions.models import Subscription, SubscriptionHistory
 from apps.trips.models import SeatAssignment, Trip
 
+from apps.notifications.models import Notification
+
 from .models import StudentReport
 from .serializers import StudentReportCreateSerializer, StudentReportSerializer
 
@@ -213,6 +215,15 @@ class StudentReportCreateView(APIView):
         serializer = StudentReportCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         report = serializer.save(student=student)
+        who = f'{student.first_name} {student.last_name}'.strip()
+        Notification.objects.create(
+            student=student,
+            notification_type=Notification.NotificationType.STUDENT_REPORT_SUBMITTED,
+            message=(
+                f'From: {who} ({student.email}) — New student report [{report.get_report_type_display()}]: '
+                f'"{report.title}". Review in Pending Alerts.'
+            ),
+        )
         return Response(StudentReportSerializer(report).data, status=status.HTTP_201_CREATED)
 
 
@@ -259,10 +270,17 @@ class ManagerResolveStudentReportView(APIView):
     )
     def patch(self, request, report_id):
         try:
-            report = StudentReport.objects.get(pk=report_id)
+            report = StudentReport.objects.select_related('student').get(pk=report_id)
         except StudentReport.DoesNotExist:
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
         report.status = StudentReport.Status.RESOLVED
         report.resolved_at = timezone.now()
         report.save(update_fields=['status', 'resolved_at'])
+        Notification.objects.create(
+            student=report.student,
+            notification_type=Notification.NotificationType.REPORT_RESOLVED,
+            message=(
+                f'Your request or issue regarding report "{report.title}" has been resolved.'
+            ),
+        )
         return Response(StudentReportSerializer(report).data)
