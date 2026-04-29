@@ -1,4 +1,4 @@
-# Python
+<# Python
 venv/
 __pycache__/
 *.pyc
@@ -7,10 +7,20 @@ __pycache__/
 db.sqlite3
 .env
 
+# Python artifacts
+*.py[cod]
+*$py.class
+# Virtual environments
+backend-api/venv/
+
 # Node.js
 node_modules/
 .next/
 package-lock.json
+
+# Node artifacts
+.npm/
+frontend/.next/
 
 # OS
 .DS_Store
