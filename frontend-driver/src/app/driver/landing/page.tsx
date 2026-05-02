@@ -85,26 +85,6 @@ const BusStatIcon = ({ size = 26, color = "#1a56db" }: { size?: number; color?: 
   </svg>
 );
 
-const SearchIcon = ({ size = 15, color = "#fff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8" />
-    <path d="M21 21l-4.35-4.35" />
-  </svg>
-);
-
-const MapPinSmall = ({ size = 16, color = "#9ca3af" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
-const ArrowRightIcon = ({ size = 14, color = "#fff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </svg>
-);
-
 const ShieldFooterIcon = ({ size = 14, color = "#1a56db" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.5C16.5 22.15 20 17.25 20 12V6L12 2z" />
@@ -153,7 +133,6 @@ const featureStrip = [
 export default function DriverLandingPage() {
   const [activeNav, setActiveNav] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div className={styles.page}>
@@ -228,11 +207,11 @@ export default function DriverLandingPage() {
         {/* Left: text + CTAs */}
         <div className={styles.heroLeft}>
           <h1 className={styles.heroTitle}>
-            Your Journey.<br />
-            <span className={styles.heroTitleBlue}>Our Priority.</span>
+            Your bus. Your lines.<br />
+            <span className={styles.heroTitleBlue}>We&apos;ve got your back.</span>
           </h1>
           <p className={styles.heroDesc}>
-            UNITRANS makes your daily commute easy, reliable and safe. Access schedules, manage your subscription, and stay updated – all in one place.
+            The driver portal keeps your work in one place: assigned routes and stops, line history for your vehicle, incident reports with manager replies, and notifications when things change.
           </p>
           <div className={styles.heroCtas}>
             {/*<Link href="/driver/login" className={styles.heroCtaPrimary}>
@@ -243,12 +222,12 @@ export default function DriverLandingPage() {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
               </svg>
-              How It Works
+              What&apos;s in the portal
             </a>
           </div>
         </div>
 
-        {/* Right: bus photo + floating card */}
+        {/* Right: bus photo */}
         <div className={styles.heroRight}>
           <div className={styles.heroImageWrap}>
             <Image
@@ -259,27 +238,6 @@ export default function DriverLandingPage() {
               priority
               sizes="55vw"
             />
-          </div>
-
-          {/* Floating Plan Your Ride card */}
-          <div className={styles.planCard}>
-            <div className={styles.planCardTitle}>Plan Your Ride</div>
-            <div className={styles.planCardDesc}>Check schedules, routes and plan your journey easily.</div>
-            <div className={styles.planInputWrap}>
-              <span className={styles.planInputIcon}><MapPinSmall /></span>
-              <input
-                type="text"
-                className={styles.planInput}
-                placeholder="Enter destination or line"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Link href="/driver/login" className={styles.planSearchBtn}>
-              <SearchIcon size={14} color="#fff" />
-              Search Routes
-              <ArrowRightIcon size={13} color="#fff" />
-            </Link>
           </div>
         </div>
       </section>
