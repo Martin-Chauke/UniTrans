@@ -1,5 +1,5 @@
 import { driverClient } from "@/api/driver-client";
-import type { Incident, Notification, PaginatedList, Trip } from "@/api/types";
+import type { DriverLine, Incident, Notification, PaginatedList, Trip } from "@/api/types";
 
 export interface DriverMe {
   driver_id: number;
@@ -29,6 +29,25 @@ export async function getDriverTrips(page = 1) {
   });
 }
 
+/** Fetches every page of trips (used to build line history grouped by route). */
+export async function fetchAllDriverTrips(): Promise<Trip[]> {
+  const all: Trip[] = [];
+  let page = 1;
+  for (;;) {
+    const res = await getDriverTrips(page);
+    const batch = res.data.results ?? [];
+    all.push(...batch);
+    if (!res.data.next || batch.length === 0) break;
+    page += 1;
+    if (page > 100) break;
+  }
+  return all;
+}
+
+export async function getDriverLines() {
+  return driverClient.get<DriverLine[]>("/api/drivers/me/lines/");
+}
+
 export async function getDriverIncidents(page = 1) {
   return driverClient.get<PaginatedList<Incident>>("/api/drivers/me/incidents/", {
     params: { page },
@@ -36,12 +55,16 @@ export async function getDriverIncidents(page = 1) {
 }
 
 export async function postDriverIncident(body: {
-  trip: number;
+  line: number;
   name: string;
   incident_type: string;
   description: string;
 }) {
   return driverClient.post<Incident>("/api/drivers/me/incidents/", body);
+}
+
+export async function deleteDriverIncident(incidentId: number) {
+  return driverClient.delete(`/api/drivers/me/incidents/${incidentId}/`);
 }
 
 export async function getDriverNotifications() {

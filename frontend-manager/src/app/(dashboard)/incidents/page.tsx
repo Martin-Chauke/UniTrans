@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, FormEvent } from "react";
-import { useIncidents, useResolveIncident, useRespondToIncident } from "@/hooks/useIncidents";
+import { useState, useMemo, useEffect, useRef, FormEvent } from "react";
+import { useIncidents, useResolveIncident, useRespondToIncident, useDeleteIncidents } from "@/hooks/useIncidents";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
@@ -36,28 +36,99 @@ export default function IncidentsPage() {
   const { data, isLoading } = useIncidents();
   const { mutate: resolve } = useResolveIncident();
   const { mutate: respond, isPending: respondPending } = useRespondToIncident();
+  const { mutateAsync: deleteIncidents, isPending: deletePending } = useDeleteIncidents();
 
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [reportOpen, setReportOpen] = useState(false);
   const [respondId, setRespondId] = useState<number | null>(null);
   const [respondMessage, setRespondMessage] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<number[] | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const selectAllRef = useRef<HTMLInputElement>(null);
 
   const incidents = data?.results ?? [];
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return incidents.filter((inc) => {
-      const lineName = (inc.trip_detail?.line_name ?? "").toLowerCase();
+      const lineFromTrip = (inc.trip_detail?.line_name ?? "").toLowerCase();
+      const lineFromLine = (inc.line_detail?.name ?? "").toLowerCase();
+      const tripToken =
+        inc.trip != null && inc.trip > 0
+          ? `trp${String(inc.trip).padStart(3, "0")}`
+          : "";
       const matchSearch =
-        `TRP${String(inc.trip).padStart(3, "0")}`.toLowerCase().includes(q) ||
+        (tripToken && tripToken.includes(q)) ||
         inc.description.toLowerCase().includes(q) ||
         inc.name.toLowerCase().includes(q) ||
-        lineName.includes(q);
+        lineFromTrip.includes(q) ||
+        lineFromLine.includes(q);
       const matchType = typeFilter === "all" || inc.incident_type === typeFilter;
       return matchSearch && matchType;
     });
   }, [incidents, search, typeFilter]);
+
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((inc) => selectedIds.has(inc.incident_id));
+  const someFilteredSelected = filtered.some((inc) => selectedIds.has(inc.incident_id));
+
+  useEffect(() => {
+    const el = selectAllRef.current;
+    if (el) {
+      el.indeterminate = someFilteredSelected && !allFilteredSelected;
+    }
+  }, [someFilteredSelected, allFilteredSelected]);
+
+  const toggleSelectOne = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllFiltered = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filtered.forEach((inc) => next.delete(inc.incident_id));
+      } else {
+        filtered.forEach((inc) => next.add(inc.incident_id));
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const openDeleteConfirm = (ids: number[]) => {
+    setDeleteError("");
+    setPendingDeleteIds(ids);
+  };
+
+  const closeDeleteConfirm = () => {
+    if (!deletePending) setPendingDeleteIds(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteIds?.length) return;
+    const ids = [...pendingDeleteIds];
+    setDeleteError("");
+    try {
+      await deleteIncidents(ids);
+      setPendingDeleteIds(null);
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        ids.forEach((id) => next.delete(id));
+        return next;
+      });
+    } catch {
+      setDeleteError("Could not delete. Try again or refresh the page.");
+    }
+  };
 
   const closeRespond = () => {
     setRespondId(null);
@@ -99,18 +170,75 @@ export default function IncidentsPage() {
           </select>
         </div>
 
+        {!isLoading && incidents.length > 0 && (
+          <div className={styles.bulkBar}>
+            <label
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                cursor: filtered.length ? "pointer" : "default",
+              }}
+            >
+              <input
+                ref={selectAllRef}
+                type="checkbox"
+                className={styles.checkbox}
+                checked={allFilteredSelected}
+                disabled={filtered.length === 0}
+                onChange={toggleSelectAllFiltered}
+                aria-label="Select all incidents matching current filters"
+              />
+              <span>
+                Select all matching filter
+                {filtered.length !== incidents.length ? ` (${filtered.length})` : ""}
+              </span>
+            </label>
+            <span style={{ color: "var(--color-muted)" }}>{selectedIds.size} selected</span>
+            <button
+              type="button"
+              className={styles.deleteSelectedBtn}
+              disabled={selectedIds.size === 0 || deletePending}
+              onClick={() => openDeleteConfirm(Array.from(selectedIds))}
+            >
+              Delete selected
+            </button>
+            <button
+              type="button"
+              className={styles.bulkLinkBtn}
+              disabled={selectedIds.size === 0}
+              onClick={clearSelection}
+            >
+              Clear selection
+            </button>
+          </div>
+        )}
+
         {isLoading ? (
           <div className={styles.loading}>Loading incidents...</div>
         ) : (
           <div className={styles.list}>
             {filtered.map((inc) => {
-              const lineName = inc.trip_detail?.line_name?.trim() ?? "";
-              const tripId = `TRP${String(inc.trip).padStart(3, "0")}`;
-              const tripLabel = lineName
-                ? `Trip: ${tripId} — ${lineName}`
-                : `Trip: ${tripId}`;
+              let tripLabel: string;
+              const lineFromTrip = inc.trip_detail?.line_name?.trim() ?? "";
+              if (inc.trip != null && inc.trip > 0) {
+                const tripId = `TRP${String(inc.trip).padStart(3, "0")}`;
+                tripLabel = lineFromTrip ? `Trip: ${tripId} — ${lineFromTrip}` : `Trip: ${tripId}`;
+              } else {
+                const ln = inc.line_detail?.name?.trim() ?? "";
+                tripLabel = ln ? `Line: ${ln}` : "Line";
+              }
               return (
                 <div key={inc.incident_id} className={styles.item}>
+                  <div className={styles.checkCell}>
+                    <input
+                      type="checkbox"
+                      className={styles.checkbox}
+                      checked={selectedIds.has(inc.incident_id)}
+                      onChange={() => toggleSelectOne(inc.incident_id)}
+                      aria-label={`Select incident: ${inc.name}`}
+                    />
+                  </div>
                   <div className={styles.iconCell}>
                     {getIcon(inc.incident_type ?? "other")}
                   </div>
@@ -165,6 +293,14 @@ export default function IncidentsPage() {
                         Resolve
                       </button>
                     )}
+                    <button
+                      type="button"
+                      className={styles.deleteBtn}
+                      onClick={() => openDeleteConfirm([inc.incident_id])}
+                      disabled={deletePending}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               );
@@ -194,6 +330,32 @@ export default function IncidentsPage() {
             {respondPending ? "Sending…" : "Send reply"}
           </button>
         </form>
+      </Modal>
+
+      <Modal
+        open={pendingDeleteIds !== null && pendingDeleteIds.length > 0}
+        onClose={closeDeleteConfirm}
+        title={pendingDeleteIds && pendingDeleteIds.length === 1 ? "Delete incident?" : "Delete incidents?"}
+        size="sm"
+      >
+        <div className={styles.modalForm}>
+          <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: 0 }}>
+            {pendingDeleteIds && pendingDeleteIds.length === 1
+              ? "This permanently removes the incident. It will disappear from the driver portal and this list."
+              : `This permanently removes ${pendingDeleteIds?.length} incidents. They will disappear from driver portals and this list.`}
+          </p>
+          {deleteError && (
+            <p style={{ fontSize: 13, color: "var(--color-red)", margin: 0 }}>{deleteError}</p>
+          )}
+          <div className={styles.modalActions}>
+            <button type="button" className={styles.modalCancelBtn} onClick={closeDeleteConfirm} disabled={deletePending}>
+              Cancel
+            </button>
+            <button type="button" className={styles.modalDeleteBtn} onClick={() => void confirmDelete()} disabled={deletePending}>
+              {deletePending ? "Deleting…" : "Delete"}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

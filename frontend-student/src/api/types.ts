@@ -429,8 +429,10 @@ export interface Incident {
   description: string;
   reported_at: string;
   resolved?: boolean;
-  trip: number;
-  trip_detail: Trip;
+  trip?: number | null;
+  trip_detail?: Trip | null;
+  line?: number | null;
+  line_detail?: { line_id: number; name: string; description?: string } | null;
   show_on_manager_dashboard_alerts?: boolean;
 }
 

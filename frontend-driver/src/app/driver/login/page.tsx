@@ -69,7 +69,7 @@ const ShieldCheckIcon = () => (
 );
 
 const features = [
-  { Icon: BusIcon, title: "Assigned trips", desc: "See trips and lines for your bus" },
+  { Icon: BusIcon, title: "Line history", desc: "See routes and trips grouped by line for your bus" },
   { Icon: MapPinIcon, title: "Track history", desc: "Review past runs and status" },
   { Icon: CalendarIcon, title: "Stay on schedule", desc: "Departure times and line details" },
   { Icon: BellIcon, title: "Report incidents", desc: "Notify managers and read their replies" },
@@ -133,7 +133,7 @@ export default function DriverLoginPage() {
           <div className={styles.brandRule} />
           <h2 className={styles.portalLabel}>Driver Portal</h2>
           <p className={styles.portalDesc}>
-            View assigned trips, track history, report incidents to your manager, and read responses — all in one place.
+            View line history, report incidents to your manager, and read responses — all in one place.
           </p>
         </div>
 

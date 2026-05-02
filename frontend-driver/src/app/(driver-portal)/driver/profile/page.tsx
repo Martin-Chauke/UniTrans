@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, useMemo, FormEvent } from "react";
 import { getDriverMe, patchDriverMe } from "@/api/modules/driver/driver.api";
 import type { DriverMe } from "@/api/modules/driver/driver.api";
 import { useDriverAuth } from "@/context/DriverAuthContext";
@@ -8,14 +8,22 @@ import { normalizePhoneFlexible } from "@/lib/phone";
 import { pickFirstApiError } from "@/lib/apiError";
 import styles from "../subpage.module.css";
 
+/** Max stored length: '+' + 15 digits (E.164) plus small paste buffer. */
+const PHONE_INPUT_MAX_LEN = 28;
+
 export default function DriverProfilePage() {
-  const { user } = useDriverAuth();
+  const { user, refreshProfile } = useDriverAuth();
   const [profile, setProfile] = useState<DriverMe | null>(null);
   const [form, setForm] = useState({ first_name: "", last_name: "", phone: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const phoneCheck = useMemo(() => normalizePhoneFlexible(form.phone), [form.phone]);
+  const phoneTrimmed = form.phone.trim();
+  const phoneHasInput = phoneTrimmed.length > 0;
+  const phoneInvalid = phoneHasInput && !phoneCheck.ok;
 
   useEffect(() => {
     getDriverMe()
@@ -49,6 +57,7 @@ export default function DriverProfilePage() {
       });
       setProfile(r.data);
       setSuccess(true);
+      await refreshProfile();
     } catch (err) {
       setError(pickFirstApiError(err, "Could not update profile."));
     } finally {
@@ -100,7 +109,10 @@ export default function DriverProfilePage() {
               id="fn"
               className={styles.input}
               value={form.first_name}
-              onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, first_name: e.target.value }));
+                setSuccess(false);
+              }}
             />
           </div>
           <div className={styles.field}>
@@ -109,23 +121,50 @@ export default function DriverProfilePage() {
               id="ln"
               className={styles.input}
               value={form.last_name}
-              onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))}
+              onChange={(e) => {
+                setForm((f) => ({ ...f, last_name: e.target.value }));
+                setSuccess(false);
+              }}
             />
           </div>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="ph">Phone</label>
             <input
               id="ph"
-              className={styles.input}
+              className={`${styles.input} ${phoneInvalid ? styles.inputInvalid : ""}`}
               value={form.phone}
-              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+              onChange={(e) => {
+                const v = e.target.value.slice(0, PHONE_INPUT_MAX_LEN);
+                setForm((f) => ({ ...f, phone: v }));
+                setSuccess(false);
+                setError("");
+              }}
               placeholder="5551234567 or +15551234567"
+              inputMode="tel"
+              autoComplete="tel"
+              aria-invalid={phoneInvalid}
+              aria-describedby="phone-hint phone-live"
             />
-            <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--color-text-secondary)" }}>
-              10 digits without country code, or + with country code.
+            <p id="phone-hint" className={styles.hintMuted}>
+              Without +, enter exactly 10 digits (spaces/formatting ignored). With +, enter 8–15 digits after +
+              (country code included in that count). Leave blank to clear your number.
             </p>
+            <div id="phone-live" role="status" aria-live="polite">
+              {phoneHasInput && phoneInvalid && (
+                <p className={styles.phoneInlineError}>{phoneCheck.message}</p>
+              )}
+              {phoneHasInput && phoneCheck.ok && (
+                <p className={styles.phoneInlineOk}>
+                  Format OK — will be saved as: {phoneCheck.normalized || "(cleared)"}
+                </p>
+              )}
+            </div>
           </div>
-          <button type="submit" className={styles.btnPrimary} disabled={saving}>
+          <button
+            type="submit"
+            className={styles.btnPrimary}
+            disabled={saving || phoneInvalid}
+          >
             {saving ? "Saving…" : "Save changes"}
           </button>
         </form>

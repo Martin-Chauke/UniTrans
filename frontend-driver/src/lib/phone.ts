@@ -12,10 +12,11 @@ export function normalizePhoneFlexible(raw: string): PhoneResult {
 
   if (s.startsWith("+")) {
     const digits = digitsOnly(s.slice(1));
-    if (digits.length < 8 || digits.length > 15) {
+    const n = digits.length;
+    if (n < 8 || n > 15) {
       return {
         ok: false,
-        message: "International numbers must use + followed by 8–15 digits (country code + number).",
+        message: `After "+", use 8–15 digits including country code (you entered ${n} digit${n === 1 ? "" : "s"}).`,
       };
     }
     if (digits.startsWith("1") && digits.length === 11) {
@@ -25,12 +26,13 @@ export function normalizePhoneFlexible(raw: string): PhoneResult {
   }
 
   const digits = digitsOnly(s);
-  if (digits.length === 10) return { ok: true, normalized: digits };
-  if (digits.length === 11 && digits.startsWith("1")) {
+  const nd = digits.length;
+  if (nd === 10) return { ok: true, normalized: digits };
+  if (nd === 11 && digits.startsWith("1")) {
     return { ok: true, normalized: digits.slice(1) };
   }
   return {
     ok: false,
-    message: "Enter a 10-digit phone number, or include country code (e.g. +1 for US, +44 for UK).",
+    message: `Without "+", use exactly 10 digits (you entered ${nd}). Or start with + and enter 8–15 digits after + (country code counts toward that total).`,
   };
 }

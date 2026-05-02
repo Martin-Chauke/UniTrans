@@ -45,3 +45,19 @@ export function useRespondToIncident() {
     },
   });
 }
+
+/** Permanently delete one or more incidents (sequential DELETE calls). */
+export function useDeleteIncidents() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (incidentIds: number[]) => {
+      for (const id of incidentIds) {
+        await incidentsApi.managerDeleteIncident(id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+    },
+  });
+}

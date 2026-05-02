@@ -6,9 +6,11 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from apps.lines.serializers import DriverAssignedLineSerializer
 from apps.trips.models import Trip
 from apps.trips.serializers import TripSerializer
 
+from .driver_bus_lines import lines_queryset_all_assigned_for_driver_bus, lines_queryset_for_driver_bus
 from .tokens import CustomAccessToken
 
 from .models import Driver, Student, User
@@ -178,6 +180,22 @@ class DriverTripsListView(generics.ListAPIView):
 
 
 @extend_schema(tags=['accounts'])
+class DriverLinesListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, IsDriver]
+    serializer_class = DriverAssignedLineSerializer
+    pagination_class = None
+
+    @extend_schema(summary='Assigned lines for my bus (stations + active assignment flag)')
+    def get_queryset(self):
+        return lines_queryset_all_assigned_for_driver_bus(self.request.user.driver_profile)
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['driver_bus'] = self.request.user.driver_profile.assigned_bus
+        return ctx
+
+
+@extend_schema(tags=['accounts'])
 class StudentMeView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -276,7 +294,7 @@ class ManagerDashboardView(APIView):
 
         unresolved_incidents = (
             Incident.objects.filter(resolved=False, show_on_manager_dashboard_alerts=True)
-            .select_related('trip__schedule__line')
+            .select_related('trip__schedule__line', 'line')
             .order_by('-reported_at')[:5]
         )
         from apps.incidents.serializers import IncidentSerializer

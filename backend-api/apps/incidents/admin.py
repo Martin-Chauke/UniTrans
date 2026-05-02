@@ -6,9 +6,17 @@ from .models import Incident
 
 @admin.register(Incident)
 class IncidentAdmin(admin.ModelAdmin):
-    list_display = ['incident_id', 'name', 'incident_type', 'trip', 'reported_at', 'resolved_badge']
-    list_filter = ['incident_type', 'resolved', 'trip__schedule__line']
-    search_fields = ['name', 'description', 'trip__schedule__line__name']
+    list_display = ['incident_id', 'name', 'incident_type', 'trip_or_line', 'reported_at', 'resolved_badge']
+    list_filter = ['incident_type', 'resolved', 'trip__schedule__line', 'line']
+    search_fields = ['name', 'description', 'trip__schedule__line__name', 'line__name']
+
+    @admin.display(description='Trip / line')
+    def trip_or_line(self, obj):
+        if obj.trip_id:
+            return obj.trip
+        if obj.line_id:
+            return f'Line: {obj.line}'
+        return '—'
     ordering = ['-reported_at']
     readonly_fields = ['incident_id', 'reported_at']
 

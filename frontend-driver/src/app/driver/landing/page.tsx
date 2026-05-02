@@ -130,8 +130,8 @@ const navItems = [
 const featureStrip = [
   {
     Icon: BusStatIcon,
-    title: "Assigned trips",
-    desc: "See upcoming trips and lines for your bus.",
+    title: "Line history",
+    desc: "Review routes and trips grouped by line for your bus.",
   },
   {
     Icon: RouteFeatureIcon,

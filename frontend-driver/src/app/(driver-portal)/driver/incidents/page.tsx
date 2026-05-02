@@ -2,11 +2,16 @@
 
 import { useCallback, useEffect, useState, FormEvent } from "react";
 import {
+  deleteDriverIncident,
   getDriverIncidents,
-  getDriverTrips,
+  getDriverLines,
+  getDriverMe,
   postDriverIncident,
 } from "@/api/modules/driver/driver.api";
-import type { Incident, IncidentType, Trip } from "@/api/types";
+import type { DriverMe } from "@/api/modules/driver/driver.api";
+import type { DriverLine, Incident, IncidentType } from "@/api/types";
+import { pickFirstApiError } from "@/lib/apiError";
+import { Modal } from "@/components/ui/Modal";
 import styles from "../subpage.module.css";
 
 const INCIDENT_TYPES: { value: IncidentType; label: string }[] = [
@@ -19,12 +24,17 @@ const INCIDENT_TYPES: { value: IncidentType; label: string }[] = [
 
 export default function DriverIncidentsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [trips, setTrips] = useState<Trip[]>([]);
+  const [lines, setLines] = useState<DriverLine[]>([]);
+  const [me, setMe] = useState<DriverMe | null>(null);
+  const [linesLoadError, setLinesLoadError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [deletePending, setDeletePending] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [form, setForm] = useState({
-    trip: 0,
+    line: 0,
     name: "",
     incident_type: "other" as IncidentType,
     description: "",
@@ -32,18 +42,31 @@ export default function DriverIncidentsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLinesLoadError("");
     try {
-      const [i, t] = await Promise.all([getDriverIncidents(1), getDriverTrips(1)]);
+      const i = await getDriverIncidents(1);
       setIncidents(i.data.results ?? []);
-      const tripResults = t.data.results ?? [];
-      setTrips(tripResults);
-      setForm((f) => {
-        if (f.trip) return f;
-        if (tripResults[0]) return { ...f, trip: tripResults[0].trip_id };
-        return f;
-      });
     } catch {
       setIncidents([]);
+    }
+    try {
+      const profile = await getDriverMe();
+      setMe(profile.data);
+    } catch {
+      setMe(null);
+    }
+    try {
+      const linesRes = await getDriverLines();
+      const lineResults = linesRes.data ?? [];
+      setLines(lineResults);
+      setForm((f) => {
+        if (f.line && lineResults.some((l) => l.line_id === f.line)) return f;
+        if (lineResults[0]) return { ...f, line: lineResults[0].line_id };
+        return { ...f, line: 0 };
+      });
+    } catch {
+      setLines([]);
+      setLinesLoadError("Could not load lines for your bus. Ask your manager if routes should be assigned.");
     } finally {
       setLoading(false);
     }
@@ -56,8 +79,8 @@ export default function DriverIncidentsPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!form.trip) {
-      setError("Select a trip.");
+    if (!form.line) {
+      setError("Select a line.");
       return;
     }
     if (!form.name.trim() || !form.description.trim()) {
@@ -67,17 +90,61 @@ export default function DriverIncidentsPage() {
     setSubmitting(true);
     try {
       await postDriverIncident({
-        trip: form.trip,
+        line: form.line,
         name: form.name.trim(),
         incident_type: form.incident_type,
         description: form.description.trim(),
       });
-      setForm((f) => ({ ...f, name: "", description: "" }));
+      setForm((f) => ({
+        ...f,
+        name: "",
+        description: "",
+      }));
       await load();
-    } catch {
-      setError("Could not submit incident. Check the trip belongs to your bus.");
+    } catch (err) {
+      setError(
+        pickFirstApiError(
+          err,
+          "Could not submit incident. The line must be one assigned to your bus."
+        )
+      );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const canSubmitLine = form.line > 0;
+  const hasBus = me != null && me.assigned_bus != null;
+
+  const incidentLocationLabel = (inc: Incident) => {
+    if (inc.trip != null && inc.trip > 0) {
+      return `TRP${String(inc.trip).padStart(3, "0")}`;
+    }
+    const n = inc.line_detail?.name?.trim() || inc.line_detail?.name;
+    if (n) return n;
+    if (inc.line != null && inc.line > 0) return `Line #${inc.line}`;
+    return "—";
+  };
+
+  const closeDeleteModal = () => {
+    if (!deletePending) {
+      setDeleteTargetId(null);
+      setDeleteError("");
+    }
+  };
+
+  const confirmDeleteReport = async () => {
+    if (deleteTargetId == null) return;
+    setDeleteError("");
+    setDeletePending(true);
+    try {
+      await deleteDriverIncident(deleteTargetId);
+      setDeleteTargetId(null);
+      await load();
+    } catch (err) {
+      setDeleteError(pickFirstApiError(err, "Could not delete this report."));
+    } finally {
+      setDeletePending(false);
     }
   };
 
@@ -91,21 +158,38 @@ export default function DriverIncidentsPage() {
       <div className={styles.card}>
         <div className={styles.cardTitle}>Report an incident</div>
         {error && <div className={styles.errorBanner}>{error}</div>}
+        {me !== null && me.assigned_bus == null && (
+          <div className={styles.errorBanner}>
+            No bus is assigned to your profile yet. Ask your transport manager to assign a bus before you can report
+            against a line.
+          </div>
+        )}
+        {linesLoadError && <div className={styles.errorBanner}>{linesLoadError}</div>}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>
-            <label className={styles.label}>Trip</label>
-            <select
-              className={styles.select}
-              value={form.trip || ""}
-              onChange={(e) => setForm((f) => ({ ...f, trip: Number(e.target.value) }))}
-              disabled={!trips.length}
-            >
-              {trips.map((t) => (
-                <option key={t.trip_id} value={t.trip_id}>
-                  TRP{String(t.trip_id).padStart(3, "0")} — {t.line_name ?? "Line"} ({t.status})
-                </option>
-              ))}
-            </select>
+            <label className={styles.label}>Line</label>
+            {lines.length > 0 ? (
+              <select
+                className={styles.select}
+                value={String(form.line)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setForm((f) => ({ ...f, line: Number(v) }));
+                }}
+              >
+                {lines.map((ln) => (
+                  <option key={ln.line_id} value={String(ln.line_id)}>
+                    {ln.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className={styles.hintMuted}>
+                {hasBus
+                  ? "No lines are linked to your bus yet (routes or bus–line assignments). Your manager can add schedules or assignments."
+                  : "Assign a bus to your account to load lines."}
+              </p>
+            )}
           </div>
           <div className={styles.field}>
             <label className={styles.label}>Short title</label>
@@ -140,7 +224,7 @@ export default function DriverIncidentsPage() {
               placeholder="Describe what happened…"
             />
           </div>
-          <button type="submit" className={styles.btnPrimary} disabled={submitting || !trips.length}>
+          <button type="submit" className={styles.btnPrimary} disabled={submitting || !canSubmitLine || !hasBus}>
             {submitting ? "Submitting…" : "Submit report"}
           </button>
         </form>
@@ -155,11 +239,15 @@ export default function DriverIncidentsPage() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {incidents.map((inc) => (
-              <div key={inc.incident_id} className={styles.notifItem}>
-                <div>
+              <div
+                key={inc.incident_id}
+                className={styles.notifItem}
+                style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div className={styles.notifMsg} style={{ fontWeight: 700 }}>{inc.name}</div>
                   <div className={styles.notifMeta}>
-                    {inc.incident_type_display} · TRP{String(inc.trip).padStart(3, "0")} ·{" "}
+                    {inc.incident_type_display} · {incidentLocationLabel(inc)} ·{" "}
                     {new Date(inc.reported_at).toLocaleString()}
                     {inc.resolved ? " · Resolved" : ""}
                   </div>
@@ -187,11 +275,42 @@ export default function DriverIncidentsPage() {
                     <p className={styles.notifMeta} style={{ marginTop: 8 }}>Awaiting manager response</p>
                   )}
                 </div>
+                <button
+                  type="button"
+                  className={styles.btnDanger}
+                  onClick={() => {
+                    setDeleteError("");
+                    setDeleteTargetId(inc.incident_id);
+                  }}
+                >
+                  Delete
+                </button>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      <Modal open={deleteTargetId !== null} onClose={closeDeleteModal} title="Delete this report?" size="sm">
+        <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: 0 }}>
+          This removes the incident from your list and the manager portal. You cannot undo this.
+        </p>
+        {deleteError ? <div className={styles.errorBanner} style={{ marginTop: 12 }}>{deleteError}</div> : null}
+        <div className={styles.modalActions}>
+          <button type="button" className={styles.btnSecondary} onClick={closeDeleteModal} disabled={deletePending}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className={styles.btnPrimary}
+            style={{ background: "#dc2626" }}
+            onClick={() => void confirmDeleteReport()}
+            disabled={deletePending}
+          >
+            {deletePending ? "Deleting…" : "Delete report"}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

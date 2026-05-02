@@ -61,7 +61,7 @@ const ChevronIcon = ({ collapsed }: { collapsed: boolean }) => (
 
 const navItems = [
   { href: "/driver/dashboard", label: "Dashboard", icon: <HomeIcon /> },
-  { href: "/driver/trips", label: "Trip history", icon: <HistoryIcon /> },
+  { href: "/driver/lines", label: "Line history", icon: <HistoryIcon /> },
   { href: "/driver/incidents", label: "Incidents", icon: <AlertIcon /> },
   { href: "/driver/notifications", label: "Notifications", icon: <BellNavIcon /> },
   { href: "/driver/profile", label: "Profile", icon: <UserIcon /> },

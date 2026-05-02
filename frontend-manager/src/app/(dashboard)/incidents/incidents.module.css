@@ -47,8 +47,75 @@
 .filters {
   padding: 16px;
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
+  align-items: center;
   border-bottom: 1px solid var(--color-border);
+}
+
+.bulkBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 10px 16px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.bulkLinkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.bulkLinkBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.deleteSelectedBtn {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--color-red);
+  background: var(--color-white);
+  color: var(--color-red);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.deleteSelectedBtn:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.deleteSelectedBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.checkCell {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
 }
 
 .select {
@@ -163,6 +230,68 @@
 
 .replyBtn:hover {
   filter: brightness(0.97);
+}
+
+.deleteBtn {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-red);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.deleteBtn:hover {
+  background: #fef2f2;
+  border-color: var(--color-red);
+}
+
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.modalCancelBtn {
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.modalCancelBtn:hover {
+  background: var(--color-bg);
+}
+
+.modalDeleteBtn {
+  height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-red);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modalDeleteBtn:hover:not(:disabled) {
+  background: var(--color-red-dark);
+}
+
+.modalDeleteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .driverTag {

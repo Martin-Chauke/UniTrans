@@ -30,9 +30,13 @@ function incidentVariant(type: string) {
 }
 
 function incidentTripLineLabel(inc: Incident) {
-  const lineName = inc.trip_detail?.line_name?.trim() ?? "";
-  const tripId = `TRP${String(inc.trip).padStart(3, "0")}`;
-  return lineName ? `Trip: ${tripId} — ${lineName}` : `Trip: ${tripId}`;
+  const lineFromTrip = inc.trip_detail?.line_name?.trim() ?? "";
+  if (inc.trip != null && inc.trip > 0) {
+    const tripId = `TRP${String(inc.trip).padStart(3, "0")}`;
+    return lineFromTrip ? `Trip: ${tripId} — ${lineFromTrip}` : `Trip: ${tripId}`;
+  }
+  const lineName = inc.line_detail?.name?.trim() ?? "";
+  return lineName ? `Line: ${lineName}` : "Line";
 }
 
 type CombinedItem =

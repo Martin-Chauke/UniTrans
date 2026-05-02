@@ -9,6 +9,7 @@ export function useDrivers(page?: number) {
       const res = await driversApi.managerGetDrivers(page);
       return res.data;
     },
+    staleTime: 0,
   });
 }
 
@@ -20,6 +21,7 @@ export function useDriver(driverId: number | null) {
       return res.data;
     },
     enabled: driverId !== null,
+    staleTime: 0,
   });
 }
 

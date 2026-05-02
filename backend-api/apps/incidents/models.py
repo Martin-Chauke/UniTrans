@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+from apps.lines.models import Line
 from apps.trips.models import Trip
 
 
@@ -23,7 +24,20 @@ class Incident(models.Model):
         default=False,
         help_text='If true, unresolved incident may appear in manager dashboard Pending Alerts.',
     )
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='incidents')
+    trip = models.ForeignKey(
+        Trip,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='incidents',
+    )
+    line = models.ForeignKey(
+        Line,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='incidents',
+    )
     reported_by_driver = models.ForeignKey(
         'accounts.Driver',
         on_delete=models.SET_NULL,
@@ -48,7 +62,11 @@ class Incident(models.Model):
         ordering = ['-reported_at']
 
     def __str__(self):
-        return f'[{self.incident_type}] {self.name} — Trip #{self.trip_id}'
+        if self.trip_id:
+            return f'[{self.incident_type}] {self.name} — Trip #{self.trip_id}'
+        if self.line_id:
+            return f'[{self.incident_type}] {self.name} — Line: {self.line.name}'
+        return f'[{self.incident_type}] {self.name}'
 
     def report(self):
         self.save()

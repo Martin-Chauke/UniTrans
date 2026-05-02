@@ -30,6 +30,8 @@ interface DriverAuthContextValue {
   isAuthenticated: boolean;
   login: (data: LoginRequest) => Promise<void>;
   logout: () => void;
+  /** Re-fetch `/api/drivers/me/` and merge into `user` (e.g. after profile save). */
+  refreshProfile: () => Promise<void>;
 }
 
 const DriverAuthContext = createContext<DriverAuthContextValue | null>(null);
@@ -135,6 +137,13 @@ export function DriverAuthProvider({ children }: { children: React.ReactNode }) 
     setUser(null);
   }, []);
 
+  const refreshProfile = useCallback(async () => {
+    const token = getDriverAccessToken();
+    if (!token) return;
+    const profile = await fetchDriverProfile();
+    setUser((prev) => (prev ? { ...prev, ...profile } : prev));
+  }, []);
+
   return (
     <DriverAuthContext.Provider
       value={{
@@ -143,6 +152,7 @@ export function DriverAuthProvider({ children }: { children: React.ReactNode }) 
         isAuthenticated: !!user,
         login,
         logout,
+        refreshProfile,
       }}
     >
       {children}

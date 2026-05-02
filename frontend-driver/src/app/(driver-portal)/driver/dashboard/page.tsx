@@ -2,9 +2,14 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { getDriverMe, getDriverTrips, getDriverIncidents } from "@/api/modules/driver/driver.api";
+import {
+  getDriverMe,
+  getDriverTrips,
+  getDriverLines,
+  getDriverIncidents,
+} from "@/api/modules/driver/driver.api";
 import type { DriverMe } from "@/api/modules/driver/driver.api";
-import type { Incident, Trip } from "@/api/types";
+import type { DriverLine, Incident, Trip } from "@/api/types";
 import styles from "./dashboard.module.css";
 
 const BusIcon = () => (
@@ -17,19 +22,22 @@ const BusIcon = () => (
 export default function DriverDashboardPage() {
   const [me, setMe] = useState<DriverMe | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [lines, setLines] = useState<DriverLine[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [m, t, i] = await Promise.all([
+      const [m, t, ln, i] = await Promise.all([
         getDriverMe(),
         getDriverTrips(1),
+        getDriverLines().catch(() => ({ data: [] as DriverLine[] })),
         getDriverIncidents(1),
       ]);
       setMe(m.data);
       setTrips(t.data.results ?? []);
+      setLines(ln.data ?? []);
       setIncidents(i.data.results ?? []);
     } catch {
       setMe(null);
@@ -49,6 +57,7 @@ export default function DriverDashboardPage() {
     trips[0];
 
   const openIncidents = incidents.filter((x) => !x.resolved).length;
+  const activeLineCount = lines.filter((l) => l.is_assignment_active === true).length;
 
   if (loading) {
     return (
@@ -63,7 +72,7 @@ export default function DriverDashboardPage() {
       <div className={styles.headerRow}>
         <div>
           <h1 className={styles.title}>Dashboard</h1>
-          <p className={styles.subtitle}>Your assigned bus, trips, and incident activity</p>
+          <p className={styles.subtitle}>Your assigned bus, lines, and incident activity</p>
         </div>
         <button type="button" className={styles.refreshBtn} onClick={load}>
           Refresh
@@ -80,9 +89,11 @@ export default function DriverDashboardPage() {
           {bus?.model && <div className={styles.statHint}>{bus.model}</div>}
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statLabel}>Recent trips loaded</div>
-          <div className={styles.statValue}>{trips.length}</div>
-          <div className={styles.statHint}>From your last page of history</div>
+          <div className={styles.statLabel}>Lines on your bus</div>
+          <div className={styles.statValue}>{lines.length}</div>
+          <div className={styles.statHint}>
+            {activeLineCount} active assignment{activeLineCount !== 1 ? "s" : ""} today
+          </div>
         </div>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Open incidents (mine)</div>
@@ -92,27 +103,71 @@ export default function DriverDashboardPage() {
       </div>
 
       <div className={styles.panel}>
-        <h2 className={styles.panelTitle}>Current / next trip</h2>
+        <h2 className={styles.panelTitle}>Your assigned lines &amp; stops</h2>
         {!me?.assigned_bus ? (
           <p className={styles.muted}>No bus is assigned to your profile yet. Contact your transport manager.</p>
-        ) : !focusTrip ? (
-          <p className={styles.muted}>No trips found for your bus yet.</p>
+        ) : lines.length === 0 ? (
+          <p className={styles.muted}>
+            No lines are linked to this bus yet. When your manager assigns lines or schedules trips, they will appear
+            here with stations.
+          </p>
         ) : (
-          <div className={styles.tripCard}>
-            <div className={styles.tripRow}>
-              <span className={styles.tripRef}>TRP{String(focusTrip.trip_id).padStart(3, "0")}</span>
-              <span className={styles.badge}>{focusTrip.status?.replace("_", " ")}</span>
+          <div className={styles.lineList}>
+            {lines.map((ln) => {
+              const ordered = (ln.stations ?? []).slice().sort((a, b) => a.order_index - b.order_index);
+              const active = ln.is_assignment_active === true;
+              return (
+                <div key={ln.line_id} className={styles.lineBlock}>
+                  <div className={styles.lineBlockHead}>
+                    <span className={styles.lineTitle}>{ln.name}</span>
+                    <span className={active ? styles.badgeActive : styles.badgeInactive}>
+                      {active ? "Assignment active" : "Assignment inactive"}
+                    </span>
+                  </div>
+                  {ordered.length === 0 ? (
+                    <p className={styles.muted} style={{ margin: 0 }}>
+                      No stations on this line yet.
+                    </p>
+                  ) : (
+                    <ol className={styles.stationOl}>
+                      {ordered.map((ls) => (
+                        <li key={ls.line_station_id} className={styles.stationLi}>
+                          <strong>{ls.station.name}</strong>
+                          <div className={styles.stationAddr}>{ls.station.address}</div>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {me?.assigned_bus && focusTrip && (
+          <div className={styles.tripSnippet}>
+            <p className={styles.tripSnippetTitle}>Current / next trip</p>
+            <div className={styles.tripCard}>
+              <div className={styles.tripRow}>
+                <span className={styles.lineName} style={{ fontSize: 16, marginTop: 0 }}>
+                  {focusTrip.line_name ?? "—"}
+                </span>
+                <span className={styles.badge}>{focusTrip.status?.replace("_", " ")}</span>
+              </div>
+              <div className={styles.meta}>
+                <span>Trip TRP{String(focusTrip.trip_id).padStart(3, "0")}</span>
+                {focusTrip.schedule_detail?.departure_time?.slice(0, 5) && (
+                  <span> · Departs ~{focusTrip.schedule_detail.departure_time.slice(0, 5)}</span>
+                )}
+              </div>
             </div>
-            <div className={styles.lineName}>{focusTrip.line_name ?? "—"}</div>
-            <div className={styles.meta}>
-              {focusTrip.schedule_detail?.departure_time?.slice(0, 5) && (
-                <span>Departs ~{focusTrip.schedule_detail.departure_time.slice(0, 5)}</span>
-              )}
-            </div>
-            <div className={styles.actions}>
-              <Link href="/driver/incidents" className={styles.primaryBtn}>Report incident</Link>
-              <Link href="/driver/trips" className={styles.secondaryBtn}>All trips</Link>
-            </div>
+          </div>
+        )}
+
+        {me?.assigned_bus && (
+          <div className={styles.actions} style={{ marginTop: 16 }}>
+            <Link href="/driver/incidents" className={styles.primaryBtn}>Report incident</Link>
+            <Link href="/driver/lines" className={styles.secondaryBtn}>Line history</Link>
           </div>
         )}
       </div>

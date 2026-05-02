@@ -420,6 +420,28 @@ export interface SubscriptionHistory {
   new_line_name: string;
 }
 
+/** Ordered stop on a line (from `/api/drivers/me/lines/`). */
+export interface DriverLineStation {
+  line_station_id: number;
+  order_index: number;
+  station: {
+    station_id: number;
+    name: string;
+    address: string;
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+}
+
+/** `/api/drivers/me/lines/` — includes `is_assignment_active` and `stations` when returned in full. */
+export interface DriverLine {
+  line_id: number;
+  name: string;
+  description?: string;
+  is_assignment_active?: boolean;
+  stations?: DriverLineStation[];
+}
+
 // ─── Incident ─────────────────────────────────────────────────────────────────
 
 export interface Incident {
@@ -430,8 +452,10 @@ export interface Incident {
   description: string;
   reported_at: string;
   resolved?: boolean;
-  trip: number;
-  trip_detail: Trip;
+  trip?: number | null;
+  trip_detail?: Trip | null;
+  line?: number | null;
+  line_detail?: DriverLine | null;
   show_on_manager_dashboard_alerts?: boolean;
   reported_by_driver?: number | null;
   reported_by_driver_detail?: {

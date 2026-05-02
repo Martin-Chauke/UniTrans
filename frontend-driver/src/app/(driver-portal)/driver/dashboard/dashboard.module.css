@@ -600,6 +600,76 @@
   text-decoration: none;
 }
 .secondaryBtn:hover { background: var(--color-border); }
+
+.lineList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lineBlock {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: var(--color-bg);
+}
+.lineBlockHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+.lineTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.badgeActive {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--color-blue-light);
+  color: var(--color-blue-text);
+}
+.badgeInactive {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--color-border);
+  color: var(--color-muted);
+}
+.stationOl {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+.stationLi {
+  margin-bottom: 6px;
+}
+.stationAddr {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.tripSnippet {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+.tripSnippetTitle {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 8px;
+}
+
 @media (max-width: 900px) {
   .statGrid { grid-template-columns: 1fr; }
 }
