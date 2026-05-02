@@ -6,16 +6,22 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from apps.trips.models import Trip
+from apps.trips.serializers import TripSerializer
+
 from .tokens import CustomAccessToken
 
 from .models import Driver, Student, User
-from .permissions import IsAdminOrManager
+from .permissions import IsAdminOrManager, IsDriver
 from .serializers import (
     ChangePasswordSerializer,
+    DriverCreateSerializer,
+    DriverManageSerializer,
+    DriverMeSerializer,
+    DriverMeUpdateSerializer,
     DriverSerializer,
     LoginSerializer,
     ManagerRegisterSerializer,
-    PatchedDriverSerializer,
     RegisterSerializer,
     StudentDetailSerializer,
     StudentSerializer,
@@ -128,6 +134,47 @@ class ChangePasswordView(APIView):
         student.save(update_fields=['password'])
 
         return Response({'detail': 'Password updated successfully.'}, status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=['accounts'])
+class DriverMeView(APIView):
+    permission_classes = [IsAuthenticated, IsDriver]
+
+    @extend_schema(
+        summary='Get own driver profile',
+        responses={200: DriverMeSerializer},
+    )
+    def get(self, request):
+        driver = request.user.driver_profile
+        return Response(DriverMeSerializer(driver).data)
+
+    @extend_schema(
+        summary='Update own driver profile',
+        request=DriverMeUpdateSerializer,
+        responses={200: DriverMeSerializer},
+    )
+    def patch(self, request):
+        driver = request.user.driver_profile
+        serializer = DriverMeUpdateSerializer(driver, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        driver.refresh_from_db()
+        return Response(DriverMeSerializer(driver).data)
+
+
+@extend_schema(tags=['accounts'])
+class DriverTripsListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, IsDriver]
+    serializer_class = TripSerializer
+
+    @extend_schema(summary='List trips for my assigned bus')
+    def get_queryset(self):
+        bus = self.request.user.driver_profile.assigned_bus
+        if bus is None:
+            return Trip.objects.none()
+        return Trip.objects.filter(bus=bus).select_related(
+            'schedule__line', 'bus',
+        ).order_by('-trip_id')
 
 
 @extend_schema(tags=['accounts'])
@@ -279,8 +326,12 @@ class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
 )
 class DriverListView(generics.ListCreateAPIView):
     queryset = Driver.objects.select_related('assigned_bus').all().order_by('last_name', 'first_name')
-    serializer_class = DriverSerializer
     permission_classes = [IsAdminOrManager]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return DriverCreateSerializer
+        return DriverSerializer
 
 
 @extend_schema(tags=['accounts'])
@@ -292,6 +343,10 @@ class DriverListView(generics.ListCreateAPIView):
 )
 class DriverDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Driver.objects.select_related('assigned_bus').all()
-    serializer_class = DriverSerializer
     permission_classes = [IsAdminOrManager]
     lookup_field = 'driver_id'
+
+    def get_serializer_class(self):
+        if self.request.method in ('PUT', 'PATCH'):
+            return DriverManageSerializer
+        return DriverSerializer

@@ -24,6 +24,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ADMIN = 'Admin', 'Admin'
         TRANSPORT_MANAGER = 'TransportManager', 'Transport Manager'
         STUDENT = 'Student', 'Student'
+        DRIVER = 'Driver', 'Driver'
 
     user_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=150)
@@ -57,6 +58,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def is_student(self):
         return self.role == self.Role.STUDENT
+
+    def is_driver(self):
+        return self.role == self.Role.DRIVER
 
 
 class Student(models.Model):
@@ -97,6 +101,15 @@ class Driver(models.Model):
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, blank=True)
     license_number = models.CharField(max_length=50, unique=True)
+    # Last driver-portal password (plaintext) for manager reference — mirrors Student.password pattern.
+    password = models.CharField(max_length=255, blank=True, default='')
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='driver_profile',
+        null=True,
+        blank=True,
+    )
     assigned_bus = models.OneToOneField(
         'buses.Bus',
         null=True,

@@ -114,3 +114,15 @@ export const managerResolveIncident = (
     `/api/manager/incidents/${incidentId}/resolve/`,
     data ?? {}
   );
+
+/**
+ * PATCH /api/manager/incidents/{incident_id}/respond/
+ */
+export const managerRespondToIncident = (
+  incidentId: number,
+  data: { message: string }
+) =>
+  client.patch<Incident>(
+    `/api/manager/incidents/${incidentId}/respond/`,
+    data
+  );

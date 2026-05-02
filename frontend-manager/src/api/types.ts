@@ -25,7 +25,8 @@ export type NotificationType =
   | "general"
   | "student_report_submitted"
   | "student_line_changed"
-  | "report_resolved";
+  | "report_resolved"
+  | "manager_driver_update";
 
 export type UserRole = "Admin" | "TransportManager" | "Student";
 
@@ -255,6 +256,10 @@ export interface Bus {
   model: string;
   capacity: number;
   status?: BusStatus;
+  /** Present when another driver already has this bus (manager list API). */
+  assigned_driver?: { driver_id: number; name: string } | null;
+  /** Active line assignment for this bus, if any (manager list API). */
+  active_line?: { line_id: number; name: string } | null;
 }
 
 export interface BusRequest {
@@ -433,6 +438,16 @@ export interface Incident {
   trip: number;
   trip_detail: Trip;
   show_on_manager_dashboard_alerts?: boolean;
+  reported_by_driver?: number | null;
+  reported_by_driver_detail?: {
+    driver_id: number;
+    name: string;
+    email: string;
+  } | null;
+  manager_response?: string;
+  manager_responded_at?: string | null;
+  manager_response_by?: number | null;
+  manager_response_by_name?: string | null;
 }
 
 export interface IncidentRequest {
@@ -455,6 +470,10 @@ export interface PatchedIncidentResolveRequest {
   resolved?: boolean;
 }
 
+export interface IncidentManagerRespondRequest {
+  message: string;
+}
+
 // ─── Notification ─────────────────────────────────────────────────────────────
 
 export interface Notification {
@@ -464,10 +483,12 @@ export interface Notification {
   message: string;
   is_read?: boolean;
   created_at: string;
-  student: number;
-  student_name?: string;
-  student_email?: string;
-  student_registration_number?: string;
+  student?: number | null;
+  driver?: number | null;
+  student_name?: string | null;
+  student_email?: string | null;
+  student_registration_number?: string | null;
+  driver_name?: string | null;
 }
 
 export interface PatchedNotificationRequest {
@@ -581,6 +602,9 @@ export interface Driver {
   assigned_bus?: number | null;
   assigned_bus_detail?: Bus | null;
   is_active?: boolean;
+  has_portal_account?: boolean;
+  /** Last portal password (plaintext) — manager-only API; for office reference. */
+  password?: string;
 }
 
 export interface DriverRequest {
@@ -591,6 +615,8 @@ export interface DriverRequest {
   license_number: string;
   assigned_bus?: number | null;
   is_active?: boolean;
+  /** If set, provisions driver portal login (JWT). */
+  portal_password?: string;
 }
 
 export interface PatchedDriverRequest {
@@ -601,6 +627,7 @@ export interface PatchedDriverRequest {
   license_number?: string;
   assigned_bus?: number | null;
   is_active?: boolean;
+  portal_password?: string;
 }
 
 // ─── Dashboards ───────────────────────────────────────────────────────────────

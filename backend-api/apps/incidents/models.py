@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -23,6 +24,22 @@ class Incident(models.Model):
         help_text='If true, unresolved incident may appear in manager dashboard Pending Alerts.',
     )
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='incidents')
+    reported_by_driver = models.ForeignKey(
+        'accounts.Driver',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reported_incidents',
+    )
+    manager_response = models.TextField(blank=True, default='')
+    manager_responded_at = models.DateTimeField(null=True, blank=True)
+    manager_response_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='incident_responses',
+    )
 
     class Meta:
         db_table = 'incidents'

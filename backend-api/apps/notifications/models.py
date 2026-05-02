@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from apps.accounts.models import Student
+from apps.accounts.models import Driver, Student
 
 
 class Notification(models.Model):
@@ -17,9 +17,23 @@ class Notification(models.Model):
         STUDENT_REPORT_SUBMITTED = 'student_report_submitted', 'Student Report Submitted'
         STUDENT_LINE_CHANGED = 'student_line_changed', 'Student Line Changed'
         REPORT_RESOLVED = 'report_resolved', 'Report Resolved'
+        MANAGER_DRIVER_UPDATE = 'manager_driver_update', 'Manager Driver Update'
 
     notification_id = models.AutoField(primary_key=True)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='notifications')
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+        null=True,
+        blank=True,
+    )
+    driver = models.ForeignKey(
+        Driver,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+        null=True,
+        blank=True,
+    )
     notification_type = models.CharField(
         max_length=30, choices=NotificationType.choices, default=NotificationType.GENERAL
     )
@@ -32,9 +46,19 @@ class Notification(models.Model):
         verbose_name = 'Notification'
         verbose_name_plural = 'Notifications'
         ordering = ['-created_at']
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(student__isnull=False, driver__isnull=True)
+                    | models.Q(student__isnull=True, driver__isnull=False)
+                ),
+                name='notification_student_xor_driver',
+            ),
+        ]
 
     def __str__(self):
-        return f'[{self.notification_type}] → {self.student} (read={self.is_read})'
+        who = self.student if self.student_id else self.driver
+        return f'[{self.notification_type}] → {who} (read={self.is_read})'
 
     def mark_read(self):
         self.is_read = True

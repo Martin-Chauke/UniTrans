@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.lines.serializers import LineSerializer
@@ -6,10 +7,32 @@ from .models import Bus, BusAssignment
 
 
 class BusSerializer(serializers.ModelSerializer):
+    assigned_driver = serializers.SerializerMethodField(read_only=True)
+    active_line = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Bus
-        fields = ['bus_id', 'registration_number', 'model', 'capacity', 'status']
+        fields = [
+            'bus_id', 'registration_number', 'model', 'capacity', 'status',
+            'assigned_driver', 'active_line',
+        ]
         read_only_fields = ['bus_id']
+
+    def get_assigned_driver(self, obj):
+        if getattr(obj, 'driver', None):
+            d = obj.driver
+            return {
+                'driver_id': d.driver_id,
+                'name': f'{d.first_name} {d.last_name}'.strip(),
+            }
+        return None
+
+    def get_active_line(self, obj):
+        today = timezone.now().date()
+        for a in obj.assignments.all():
+            if a.start_date <= today and (a.end_date is None or a.end_date >= today):
+                return {'line_id': a.line_id, 'name': a.line.name}
+        return None
 
 
 class BusAssignmentSerializer(serializers.ModelSerializer):

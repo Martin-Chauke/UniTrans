@@ -79,6 +79,7 @@ export default function DriversPage() {
                 <th>PHONE</th>
                 <th>LICENSE NO.</th>
                 <th>ASSIGNED BUS</th>
+                <th>PORTAL PASSWORD</th>
                 <th>STATUS</th>
                 <th>ACTIONS</th>
               </tr>
@@ -101,6 +102,9 @@ export default function DriversPage() {
                     <td>{driver.phone || "—"}</td>
                     <td>{driver.license_number}</td>
                     <td>{busLabel}</td>
+                    <td className={styles.portalPassword}>
+                      {driver.password?.trim() ? driver.password : "—"}
+                    </td>
                     <td>
                       <Badge variant={driver.is_active ? "active" : "expired"}>
                         {driver.is_active ? "active" : "inactive"}
@@ -128,7 +132,7 @@ export default function DriversPage() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className={styles.empty}>
+                  <td colSpan={9} className={styles.empty}>
                     {drivers.length === 0
                       ? 'No drivers yet. Click "+ Add Driver" to add one.'
                       : "No drivers match your search."}

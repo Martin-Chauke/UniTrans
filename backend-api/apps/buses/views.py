@@ -18,7 +18,9 @@ from .serializers import BusAssignmentSerializer, BusSerializer
     destroy=extend_schema(summary='Delete a bus (Manager only)'),
 )
 class BusViewSet(ModelViewSet):
-    queryset = Bus.objects.all().order_by('registration_number')
+    queryset = Bus.objects.select_related('driver').prefetch_related(
+        'assignments__line',
+    ).all().order_by('registration_number')
     serializer_class = BusSerializer
 
     def get_permissions(self):

@@ -95,6 +95,13 @@
   font-size: 13px;
 }
 
+.portalPassword {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  word-break: break-all;
+  max-width: 160px;
+}
+
 .actionBtn {
   background: none;
   border: none;

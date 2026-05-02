@@ -1,5 +1,7 @@
 from rest_framework_simplejwt.tokens import AccessToken
 
+from apps.accounts.models import User
+
 
 class CustomAccessToken(AccessToken):
     """
@@ -14,4 +16,8 @@ class CustomAccessToken(AccessToken):
         token['role'] = user.role
         token['name'] = user.name
         token['email'] = user.email
+        if user.role == User.Role.DRIVER:
+            driver = getattr(user, 'driver_profile', None)
+            if driver is not None:
+                token['driver_id'] = driver.driver_id
         return token

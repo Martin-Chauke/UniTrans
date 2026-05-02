@@ -52,6 +52,113 @@
   border-color: var(--color-primary);
 }
 
+.passwordRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.passwordRow .input {
+  flex: 1;
+}
+
+.togglePw {
+  flex-shrink: 0;
+  min-width: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.togglePw:hover {
+  background: var(--color-border);
+}
+
+.successPanel {
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  font-size: 13px;
+  color: #166534;
+}
+
+.successPanel strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.storedPw {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  word-break: break-all;
+  padding: 8px 10px;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+  margin: 8px 0;
+}
+
+.copyBtn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: #fff;
+  cursor: pointer;
+}
+
+.copyBtn:hover {
+  background: var(--color-bg);
+}
+
+.warnBanner {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.dangerBanner {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.readOnlyInput {
+  flex: 1;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  outline: none;
+  cursor: default;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+}
+
 .footer {
   display: flex;
   gap: 10px;

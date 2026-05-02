@@ -144,19 +144,6 @@ const ArrowRightIcon = ({ size = 14, color = "#fff" }: { size?: number; color?: 
   </svg>
 );
 
-const ShieldFooterIcon = ({ size = 14, color = "#1a56db" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.5C16.5 22.15 20 17.25 20 12V6L12 2z" />
-    <polyline points="9 12 11 14 15 10" />
-  </svg>
-);
-
-const HeartIcon = ({ size = 13, color = "#1a56db" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-  </svg>
-);
-
 /* ── Inline student avatar SVG ── */
 const StudentAvatar = () => (
   <svg width="110" height="130" viewBox="0 0 110 130" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -378,21 +365,6 @@ export default function StudentLandingPage() {
           ))}
         </div>
       </section>
-
-      {/* ── Footer ── */}
-      <footer className={styles.footer}>
-        <div className={styles.footerLeft}>
-          <ShieldFooterIcon size={14} color="#1a56db" />
-          <span className={styles.footerTagline}>Safe. Reliable. On Time.</span>
-        </div>
-        <div className={styles.footerCenter}>
-          We are committed to providing a safe and efficient transport service for all students.
-        </div>
-        <div className={styles.footerRight}>
-          <HeartIcon size={13} color="#1a56db" />
-          <span>UNITRANS – Moving Together</span>
-        </div>
-      </footer>
 
     </div>
   );

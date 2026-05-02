@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useIncidents, useResolveIncident } from "@/hooks/useIncidents";
+import { useState, useMemo, FormEvent } from "react";
+import { useIncidents, useResolveIncident, useRespondToIncident } from "@/hooks/useIncidents";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Badge } from "@/components/ui/Badge";
+import { Modal } from "@/components/ui/Modal";
 import { ReportIncidentModal } from "@/components/incidents/ReportIncidentModal";
 import styles from "./incidents.module.css";
 
@@ -34,10 +35,13 @@ const getIcon = (type: string) =>
 export default function IncidentsPage() {
   const { data, isLoading } = useIncidents();
   const { mutate: resolve } = useResolveIncident();
+  const { mutate: respond, isPending: respondPending } = useRespondToIncident();
 
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [reportOpen, setReportOpen] = useState(false);
+  const [respondId, setRespondId] = useState<number | null>(null);
+  const [respondMessage, setRespondMessage] = useState("");
 
   const incidents = data?.results ?? [];
 
@@ -54,6 +58,20 @@ export default function IncidentsPage() {
       return matchSearch && matchType;
     });
   }, [incidents, search, typeFilter]);
+
+  const closeRespond = () => {
+    setRespondId(null);
+    setRespondMessage("");
+  };
+
+  const handleRespondSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!respondId || !respondMessage.trim()) return;
+    respond(
+      { incidentId: respondId, message: respondMessage.trim() },
+      { onSuccess: () => closeRespond() }
+    );
+  };
 
   return (
     <div className={styles.page}>
@@ -108,15 +126,46 @@ export default function IncidentsPage() {
                     <span className={styles.date}>
                       Reported: {new Date(inc.reported_at).toLocaleString()}
                     </span>
+                    {inc.reported_by_driver_detail && (
+                      <span className={styles.driverTag}>
+                        Driver: {inc.reported_by_driver_detail.name}
+                      </span>
+                    )}
+                    {inc.manager_response && (
+                      <div className={styles.managerReply}>
+                        <strong>Your reply: </strong>
+                        {inc.manager_response}
+                        {inc.manager_responded_at && (
+                          <span style={{ display: "block", marginTop: 4, fontSize: 11, color: "var(--color-muted)" }}>
+                            {new Date(inc.manager_responded_at).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {!inc.resolved && (
-                    <button
-                      className={styles.resolveBtn}
-                      onClick={() => resolve(inc.incident_id)}
-                    >
-                      Resolve
-                    </button>
-                  )}
+                  <div className={styles.rowActions}>
+                    {inc.reported_by_driver_detail && (
+                      <button
+                        type="button"
+                        className={styles.replyBtn}
+                        onClick={() => {
+                          setRespondId(inc.incident_id);
+                          setRespondMessage(inc.manager_response ?? "");
+                        }}
+                      >
+                        {inc.manager_response ? "Edit reply" : "Reply to driver"}
+                      </button>
+                    )}
+                    {!inc.resolved && (
+                      <button
+                        type="button"
+                        className={styles.resolveBtn}
+                        onClick={() => resolve(inc.incident_id)}
+                      >
+                        Resolve
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -128,6 +177,24 @@ export default function IncidentsPage() {
       </div>
 
       <ReportIncidentModal open={reportOpen} onClose={() => setReportOpen(false)} />
+
+      <Modal open={respondId !== null} onClose={closeRespond} title="Reply to driver" size="md">
+        <form className={styles.modalForm} onSubmit={handleRespondSubmit}>
+          <p style={{ fontSize: 13, color: "var(--color-text-secondary)", margin: 0 }}>
+            Your message is shown to the driver on their incident report.
+          </p>
+          <textarea
+            className={styles.modalTextarea}
+            value={respondMessage}
+            onChange={(e) => setRespondMessage(e.target.value)}
+            placeholder="Type your response…"
+            required
+          />
+          <button type="submit" className={styles.modalSubmit} disabled={respondPending}>
+            {respondPending ? "Sending…" : "Send reply"}
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 }

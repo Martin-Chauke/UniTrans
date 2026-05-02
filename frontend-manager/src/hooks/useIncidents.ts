@@ -33,3 +33,15 @@ export function useResolveIncident() {
     },
   });
 }
+
+export function useRespondToIncident() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ incidentId, message }: { incidentId: number; message: string }) =>
+      incidentsApi.managerRespondToIncident(incidentId, { message }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-dashboard"] });
+    },
+  });
+}

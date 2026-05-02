@@ -6,11 +6,33 @@ from .models import Notification
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ['notification_id', 'student', 'notification_type', 'short_message', 'is_read_badge', 'created_at']
+    list_display = [
+        'notification_id',
+        'recipient',
+        'notification_type',
+        'short_message',
+        'is_read_badge',
+        'created_at',
+    ]
     list_filter = ['notification_type', 'is_read']
-    search_fields = ['student__first_name', 'student__last_name', 'message']
+    search_fields = [
+        'student__first_name',
+        'student__last_name',
+        'driver__first_name',
+        'driver__last_name',
+        'message',
+    ]
     ordering = ['-created_at']
     readonly_fields = ['notification_id', 'created_at']
+
+    def recipient(self, obj):
+        if obj.student_id:
+            return f'Student: {obj.student}'
+        if obj.driver_id:
+            return f'Driver: {obj.driver}'
+        return '—'
+
+    recipient.short_description = 'Recipient'
 
     def short_message(self, obj):
         return obj.message[:60] + '...' if len(obj.message) > 60 else obj.message

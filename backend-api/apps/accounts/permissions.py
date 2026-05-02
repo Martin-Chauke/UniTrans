@@ -43,3 +43,17 @@ class IsStudent(BasePermission):
                 or hasattr(request.user, 'student_profile')
             )
         )
+
+
+class IsDriver(BasePermission):
+    """Allows access only to users with Driver role and a linked Driver profile."""
+
+    message = 'Only drivers can perform this action.'
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == User.Role.DRIVER
+            and getattr(request.user, 'driver_profile', None) is not None
+        )

@@ -1,11 +1,12 @@
 # UniTrans
 
-A full-stack university bus transport management system. The backend is a Django REST Framework API. The UI is split into **two Next.js applications** that both talk to the same API:
+A full-stack university bus transport management system. The backend is a Django REST Framework API. The UI is split into **three Next.js applications** that all talk to the same API:
 
 - **Manager Portal** (`frontend-manager/`) — for transport managers and admins to manage students, buses, drivers, lines, trips, incidents, subscriptions, statistics, and reports.
 - **Student Portal** (`frontend-student/`) — for students to view assigned transport, schedules, subscriptions, line-change requests, notifications, and support reports.
+- **Driver Portal** (`frontend-driver/`) — for drivers to view trips for their assigned bus, browse trip history, report incidents, and read manager replies (default dev port **3002**).
 
-Each app uses JWT authentication with its own login flow, Axios client, and `localStorage` keys. Because the apps run on different dev ports by default, a manager and a student can be signed in at the same time without token collisions.
+Each app uses JWT authentication with its own login flow, Axios client, and `localStorage` keys (`manager_access_token`, `student_access_token`, `driver_access_token`, …). Because the apps run on different dev ports by default, a manager, student, and driver can be signed in at the same time without token collisions.
 
 ---
 
@@ -75,6 +76,28 @@ UniTrans/
 │       ├── components/
 │       ├── context/
 │       │   └── AuthContext.tsx
+│               └── providers/
+├── frontend-driver/            # Next.js — Driver Portal (default dev port **3002**)
+│   ├── package.json
+│   ├── next.config.ts
+│   └── src/
+│       ├── app/
+│       │   ├── page.tsx                # Redirects to /driver/landing
+│       │   ├── driver/
+│       │   │   ├── landing/
+│       │   │   └── login/
+│       │   └── (driver-portal)/        # Auth-guarded driver UI
+│       │       └── driver/
+│       │           ├── dashboard/
+│       │           ├── trips/
+│       │           ├── incidents/
+│       │           └── profile/
+│       ├── api/
+│       │   ├── driver-client.ts        # Driver Axios + JWT refresh
+│       │   └── modules/driver/
+│       ├── components/driver-layout/
+│       ├── context/
+│       │   └── DriverAuthContext.tsx
 │       └── providers/
 └── frontend-student/           # Next.js — Student Portal (default dev port **3001**)
     ├── package.json
@@ -267,6 +290,38 @@ npm run dev
 | Student login | http://localhost:3001/student/login |
 | Student register | http://localhost:3001/student/register |
 
+### Driver Portal (`frontend-driver/`)
+
+1. **Go to the app folder**
+
+```bash
+cd frontend-driver
+```
+
+2. **Install dependencies**
+
+```bash
+npm install
+```
+
+3. **Environment**
+
+Create `frontend-driver/.env.local` with `NEXT_PUBLIC_API_URL=http://localhost:8000` (or your API base URL) if needed.
+
+4. **Dev server** (port **3002** per `package.json`)
+
+```bash
+npm run dev
+```
+
+| Page | URL |
+|------|-----|
+| Root (redirects) | http://localhost:3002/ → `/driver/landing` |
+| Driver landing | http://localhost:3002/driver/landing |
+| Driver login | http://localhost:3002/driver/login |
+
+Driver accounts are created by a transport manager (**Drivers** in the manager app). Set an optional **Driver portal password** when adding or editing a driver so they can sign in. Tokens are stored as `driver_access_token` and `driver_refresh_token`.
+
 ### Available scripts (each app)
 
 | Script | Command | Description |
@@ -296,7 +351,7 @@ Visit http://localhost:8000/admin/ and log in with your superuser credentials.
 
 ### Registration & Login
 
-Students register via `POST /api/auth/register/` (no tokens returned) and then log in at `/student/login` on the **student app** (port 3001 in development). On successful login (`POST /api/auth/login/`) the API returns a JWT pair which is stored in `localStorage` under the keys `student_access_token` and `student_refresh_token` — separate from the manager's `access_token` so both sessions can run side by side when using the two apps together.
+Students register via `POST /api/auth/register/` (no tokens returned) and then log in at `/student/login` on the **student app** (port 3001 in development). On successful login (`POST /api/auth/login/`) the API returns a JWT pair which is stored in `localStorage` under the keys `student_access_token` and `student_refresh_token` — separate from the manager's `access_token` and the driver's `driver_access_token` so multiple sessions can run side by side when using the apps together.
 
 ```
 Student opens /student/register (frontend-student)
