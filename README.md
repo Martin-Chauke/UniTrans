@@ -8,6 +8,8 @@ A full-stack university bus transport management system. The backend is a Django
 
 Each app uses JWT authentication with its own login flow, Axios client, and `localStorage` keys (`manager_access_token`, `student_access_token`, `driver_access_token`, …). Because the apps run on different dev ports by default, a manager, student, and driver can be signed in at the same time without token collisions.
 
+## SYSTEM OVERVIEW
+
 ![System Overview](assets/SYSTEM%20OVERVIEW.png )
 
 ---
