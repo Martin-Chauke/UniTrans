@@ -3,6 +3,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 from apps.accounts.urls import auth_urlpatterns, student_urlpatterns
+from apps.accounts.views import ApiRootView
 
 urlpatterns = [
     # Django admin
@@ -12,6 +13,9 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    # API Root
+    path('api/', ApiRootView.as_view(), name='api-root'),
 
     # Authentication
     path('api/', include((auth_urlpatterns, 'auth'))),

@@ -107,6 +107,18 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 
 @extend_schema(tags=['auth'])
+class ApiRootView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary='API root requires authentication',
+        responses={200: OpenApiResponse(description='Authenticated API root')},
+    )
+    def get(self, request):
+        return Response({'detail': 'Authenticated API root'})
+
+
+@extend_schema(tags=['auth'])
 class ChangePasswordView(APIView):
     permission_classes = [AllowAny]
 
