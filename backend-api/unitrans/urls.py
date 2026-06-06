@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
@@ -8,6 +9,7 @@ from apps.accounts.views import ApiRootView
 urlpatterns = [
     # Django admin
     path('admin/', admin.site.urls),
+    path('', lambda request: JsonResponse({'status': 'ok'})),
 
     # OpenAPI / Swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
