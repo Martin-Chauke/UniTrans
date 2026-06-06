@@ -168,6 +168,8 @@ CORS_ALLOWED_ORIGINS = config(
         'http://localhost:3002',
         'http://127.0.0.1:3002',
         'http://localhost:5173',
+        'https://uni-trans-martin-chaukes-projects.vercel.app',
+        'https://uni-trans-beige.vercel.app',
     ]),
 ).split(',')
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS if origin.strip()]
