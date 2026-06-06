@@ -1,170 +1,134 @@
-# Deployment Guide - Manager Frontend & Backend to Vercel
+# Deployment Guide - Backend on Render, Manager Frontend on Vercel
 
-## Prerequisites
-- Vercel account (sign up at [vercel.com](https://vercel.com))
-- Git repository pushed to GitHub, GitLab, or Bitbucket
-- PostgreSQL database (hosted on Azure, Supabase, Neon, or similar)
+This repo contains:
+- `backend-api/` — Django API
+- `frontend-manager/` — Next.js manager portal
 
----
-
-## Step 1: Prepare the Backend (Django)
-
-### 1.1 Update Static Files Configuration
-The backend needs to serve static files properly on Vercel. Update `unitrans/settings.py`:
-
-```python
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Add whitenoise for static file handling
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line
-    'corsheaders.middleware.CorsMiddleware',
-    # ... rest of middleware
-]
-
-# Enable compression for static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-```
-
-### 1.2 Configure CORS for Frontend
-In `unitrans/settings.py`, update CORS settings:
-
-```python
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000'
-).split(',')
-```
+The backend should be deployed on Render, and the manager frontend on Vercel.
 
 ---
 
-## Step 2: Set Up PostgreSQL Database
+## 1. Backend Deployment on Render
 
-### Option A: Supabase (Recommended - Free tier available)
-1. Go to [supabase.com](https://supabase.com) and create a project
-2. Copy the PostgreSQL connection string
-3. Use it as your `DATABASE_URL`
+### 1.1 What is included
+- `render.yaml` at repo root configures the Render web service
+- `backend-api/` is the service root
+- Django already includes `gunicorn`, `whitenoise`, and database URL support
 
-### Option B: Azure Database for PostgreSQL
-1. Create a PostgreSQL server in Azure portal
-2. Copy the connection string format: `postgresql://username:password@servername.postgres.database.azure.com:5432/dbname`
+### 1.2 Prepare Django for Render
+1. Confirm `backend-api/requirements.txt` includes:
+   - `gunicorn`
+   - `whitenoise`
+   - `dj-database-url`
+   - `python-decouple`
+2. Confirm `backend-api/unitrans/settings.py` includes:
+   - `whitenoise.middleware.WhiteNoiseMiddleware`
+   - `STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'`
+   - `SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')`
+   - `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` parsed from environment variables
 
-### Option C: Neon (PostgreSQL as a Service)
-1. Sign up at [neon.tech](https://neon.tech)
-2. Create a project and copy the connection string
+### 1.3 Create or connect a PostgreSQL database
+Use one of these options:
+- Render Postgres add-on
+- Supabase
+- Neon
+- Azure Database for PostgreSQL
 
----
+Copy the connection string and keep it for Render environment variables.
 
-## Step 3: Deploy Backend to Vercel
+### 1.4 Render service configuration
+Render will use `render.yaml` in the repo root.
+The backend service should use:
+- Root directory: `backend-api`
+- Build command: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
+- Start command: `gunicorn unitrans.wsgi:application --bind 0.0.0.0:$PORT`
 
-### 3.1 Push to Git
-Ensure your code is pushed to GitHub:
+### 1.5 Set Render environment variables
+In Render, set these env vars for the web service:
+- `DATABASE_URL` → your Postgres URL
+- `SECRET_KEY` → a strong Django secret
+- `DEBUG` → `False`
+- `ALLOWED_HOSTS` → e.g. `*.onrender.com`
+- `CORS_ALLOWED_ORIGINS` → e.g. `https://your-manager-domain.vercel.app`
+
+If using Render Postgres, do not store the database password in the repo.
+
+### 1.6 Deploy the backend
+1. Create a Render account at https://render.com
+2. Add a new Web Service
+3. Connect your GitHub repository
+4. Choose the root repo containing `render.yaml`
+5. Confirm the service uses `backend-api` as root
+6. Deploy
+
+### 1.7 Run migrations on Render
+After the first deploy, open the Render shell and run:
 ```bash
-git add .
-git commit -m "Add Vercel deployment configuration"
-git push origin main
-```
-
-### 3.2 Import Backend Project on Vercel
-1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
-2. Click **Add New** → **Project**
-3. Import your GitHub repository
-4. Select the **backend-api** folder as root directory
-5. Configure environment variables:
-   - `DATABASE_URL`: Your PostgreSQL connection string
-   - `SECRET_KEY`: Generate a secure key (use Django: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`)
-   - `DEBUG`: `False`
-   - `ALLOWED_HOSTS`: `*.vercel.app,localhost`
-   - `CORS_ALLOWED_ORIGINS`: `https://your-frontend-domain.vercel.app`
-
-6. Click **Deploy**
-
-### 3.3 Get Your Backend URL
-After deployment, you'll see a URL like: `https://your-backend.vercel.app`
-
----
-
-## Step 4: Deploy Manager Frontend to Vercel
-
-### 4.1 Import Frontend Project on Vercel
-1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
-2. Click **Add New** → **Project**
-3. Import your GitHub repository
-4. Select the **frontend-manager** folder as root directory
-5. Configure environment variables:
-   - `NEXT_PUBLIC_API_URL`: `https://your-backend.vercel.app`
-   
-6. Click **Deploy**
-
-### 4.2 Get Your Frontend URL
-You'll receive a URL like: `https://your-frontend-manager.vercel.app`
-
----
-
-## Step 5: Final Verification
-
-### Test Backend API
-```bash
-curl https://your-backend.vercel.app/api/schema/
-```
-
-### Test Frontend
-Visit `https://your-frontend-manager.vercel.app` in your browser
-
-### Verify Database Connection
-The backend will need to run migrations on first deploy. You may need to:
-1. Run migrations manually via Vercel CLI:
-```bash
-vercel env pull  # Pull environment variables
 python manage.py migrate
 ```
+If you want, also run:
+```bash
+python manage.py createsuperuser
+```
 
 ---
 
-## Environment Variables Summary
+## 2. Manager Frontend Deployment on Vercel
 
-### Backend (.env in Vercel)
+### 2.1 Verify existing Vercel config
+`frontend-manager/vercel.json` is already present and defines:
+- `installCommand`: `npm ci`
+- `buildCommand`: `npm run build`
+- `devCommand`: `npm run dev`
+
+### 2.2 Set up the Vercel project
+1. Create a Vercel account at https://vercel.com
+2. Import the same GitHub repository
+3. Set the root directory to `frontend-manager`
+4. Add a project environment variable:
+   - `NEXT_PUBLIC_API_URL` → `https://<your-render-backend>.onrender.com`
+5. Deploy
+
+### 2.3 Confirm the frontend URL
+Vercel gives you a URL such as:
+- `https://frontend-manager-yourname.vercel.app`
+
+---
+
+## 3. Required Files and Links
+
+Files added or updated:
+- `render.yaml` — Render web service specification
+- `backend-api/unitrans/settings.py` — Django deployment settings updated for Render
+- `DEPLOYMENT.md` — step-by-step Render + Vercel deployment guide
+
+Helpful links:
+- Render: https://render.com
+- Vercel: https://vercel.com
+- Django gunicorn docs: https://docs.djangoproject.com/en/stable/howto/deployment/wsgi/gunicorn/
+- Next.js deployment on Vercel: https://nextjs.org/docs/deployment
+
+---
+
+## 4. Environment Variables Summary
+
+### Render backend env vars
 ```
-DATABASE_URL=postgresql://...
-SECRET_KEY=your-secret-key
+DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname>
+SECRET_KEY=<your-secret-key>
 DEBUG=False
-ALLOWED_HOSTS=*.vercel.app,localhost
-CORS_ALLOWED_ORIGINS=https://your-frontend-manager.vercel.app
+ALLOWED_HOSTS=*.onrender.com
+CORS_ALLOWED_ORIGINS=https://<your-vercel-manager>.vercel.app
 ```
 
-### Frontend (.env.local in Vercel)
+### Vercel manager frontend env vars
 ```
-NEXT_PUBLIC_API_URL=https://your-backend.vercel.app
+NEXT_PUBLIC_API_URL=https://<your-render-backend>.onrender.com
 ```
 
 ---
 
-## Troubleshooting
-
-### Backend won't deploy
-- Check `vercel.json` exists and is valid
-- Ensure `api/wsgi.py` exists
-- Check Python dependencies in `requirements.txt`
-
-### Database connection fails
-- Verify `DATABASE_URL` is correct
-- Check database whitelist IPs (Vercel IPs may need to be added)
-- For Supabase: Ensure you're using the correct connection string format
-
-### CORS errors on frontend
-- Update `CORS_ALLOWED_ORIGINS` in backend environment variables
-- Restart backend deployment after updating
-
-### Static files not loading
-- Verify `whitenoise` is in requirements.txt
-- Check `STATICFILES_STORAGE` setting in settings.py
-
----
-
-## Next Steps
-- Set up CI/CD with GitHub Actions (optional)
-- Configure custom domain names
-- Set up monitoring and error tracking
-- Configure email service for notifications
+## 5. Notes
+- `frontend-manager/vercel.json` already exists for Vercel builds.
+- The Render backend service uses `gunicorn` and `whitenoise`.
+- Do not commit secret values to Git.
