@@ -19,22 +19,4 @@ services:
     startCommand: npm run start -- -p $PORT
     autoDeploy: true
 
-  - type: web_service
-    name: unitrans-student-frontend
-    env: node
-    plan: starter
-    branch: main
-    root: frontend-student
-    buildCommand: npm install && npm run build
-    startCommand: npm run start -- -p $PORT
-    autoDeploy: true
-
-  - type: web_service
-    name: unitrans-driver-frontend
-    env: node
-    plan: starter
-    branch: main
-    root: frontend-driver
-    buildCommand: npm install && npm run build
-    startCommand: npm run start -- -p $PORT
-    autoDeploy: true
+   
