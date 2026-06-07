@@ -1,10 +1,12 @@
-# Deployment Guide - Backend on Render, Manager Frontend on Vercel
+# Deployment Guide - Backend and Frontends on Render
 
 This repo contains:
 - `backend-api/` — Django API
 - `frontend-manager/` — Next.js manager portal
+- `frontend-student/` — Next.js student portal
+- `frontend-driver/` — Next.js driver portal
 
-The backend should be deployed on Render, and the manager frontend on Vercel.
+All services can be deployed on Render using `render.yaml` in the repo root.
 
 ---
 
@@ -13,7 +15,7 @@ The backend should be deployed on Render, and the manager frontend on Vercel.
 ### 1.1 What is included
 - `render.yaml` at repo root configures the Render web service
 - `backend-api/` is the service root
-- Django already includes `gunicorn`, `whitenoise`, and database URL support
+- Django includes `gunicorn`, `whitenoise`, and database URL support
 
 ### 1.2 Prepare Django for Render
 1. Confirm `backend-api/requirements.txt` includes:
@@ -40,16 +42,16 @@ Copy the connection string and keep it for Render environment variables.
 Render will use `render.yaml` in the repo root.
 The backend service should use:
 - Root directory: `backend-api`
-- Build command: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
+- Build command: `pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput`
 - Start command: `gunicorn unitrans.wsgi:application --bind 0.0.0.0:$PORT`
 
-### 1.5 Set Render environment variables
-In Render, set these env vars for the web service:
+### 1.5 Set Render environment variables for backend
+In Render, set these env vars for the backend service:
 - `DATABASE_URL` → your Postgres URL
 - `SECRET_KEY` → a strong Django secret
 - `DEBUG` → `False`
 - `ALLOWED_HOSTS` → e.g. `*.onrender.com`
-- `CORS_ALLOWED_ORIGINS` → e.g. `https://your-manager-domain.vercel.app`
+- `CORS_ALLOWED_ORIGINS` → frontend domains on Render
 
 If using Render Postgres, do not store the database password in the repo.
 
@@ -73,55 +75,60 @@ python manage.py createsuperuser
 
 ---
 
-## 2. Manager Frontend Deployment on Vercel
+## 2. Frontend Deployment on Render
 
-### 2.1 Verify existing Vercel config
-`frontend-manager/vercel.json` is already present and defines:
-- `installCommand`: `npm ci`
-- `buildCommand`: `npm run build`
-- `devCommand`: `npm run dev`
+### 2.1 Configured frontend services
+The repo now includes Render services for all three Next.js frontends:
+- `frontend-manager`
+- `frontend-student`
+- `frontend-driver`
 
-### 2.2 Set up the Vercel project
-1. Create a Vercel account at https://vercel.com
-2. Import the same GitHub repository
-3. Set the root directory to `frontend-manager`
-4. Add a project environment variable:
-   - `NEXT_PUBLIC_API_URL` → `https://<your-render-backend>.onrender.com`
-5. Deploy
+Each service uses:
+- Environment: `Node`
+- Build command: `npm install && npm run build`
+- Start command: `npm run start -- -p $PORT`
 
-### 2.3 Confirm the frontend URL
-Vercel gives you a URL such as:
-- `https://frontend-manager-yourname.vercel.app`
+### 2.2 Render configuration in `render.yaml`
+The updated `render.yaml` includes:
+- `unitrans-manager-frontend`
+- `unitrans-student-frontend`
+- `unitrans-driver-frontend`
+
+Each frontend service is rooted in its own directory.
+
+### 2.3 Set Render environment variables for frontends
+In Render, set these env vars for each frontend service as needed:
+- `NEXT_PUBLIC_API_URL` → `https://<your-render-backend>.onrender.com`
+- Any other frontend-specific variables your app requires
+
+### 2.4 Deploy each frontend
+1. Create a Render account at https://render.com
+2. Add a new Web Service for each portal
+3. Set the root directory to the frontend folder
+4. Configure the build and start commands
+5. Add the required environment variables
+6. Deploy
 
 ---
 
-## 3. Required Files and Links
+## 3. Example `render.yaml`
 
-Files added or updated:
-- `render.yaml` — Render web service specification
-- `backend-api/unitrans/settings.py` — Django deployment settings updated for Render
-- `DEPLOYMENT.md` — step-by-step Render + Vercel deployment guide
-
-Helpful links:
-- Render: https://render.com
-- Vercel: https://vercel.com
-- Django gunicorn docs: https://docs.djangoproject.com/en/stable/howto/deployment/wsgi/gunicorn/
-- Next.js deployment on Vercel: https://nextjs.org/docs/deployment
+The repo now includes the full service list for backend and frontends.
 
 ---
 
 ## 4. Environment Variables Summary
 
-### Render backend env vars
+### Backend env vars
 ```
 DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<dbname>
 SECRET_KEY=<your-secret-key>
 DEBUG=False
 ALLOWED_HOSTS=*.onrender.com
-CORS_ALLOWED_ORIGINS=https://<your-vercel-manager>.vercel.app
+CORS_ALLOWED_ORIGINS=https://<your-manager-domain>.onrender.com,https://<your-student-domain>.onrender.com,https://<your-driver-domain>.onrender.com
 ```
 
-### Vercel manager frontend env vars
+### Frontend env vars
 ```
 NEXT_PUBLIC_API_URL=https://<your-render-backend>.onrender.com
 ```
@@ -129,6 +136,6 @@ NEXT_PUBLIC_API_URL=https://<your-render-backend>.onrender.com
 ---
 
 ## 5. Notes
-- `frontend-manager/vercel.json` already exists for Vercel builds.
-- The Render backend service uses `gunicorn` and `whitenoise`.
+- All services are now intended for Render deployment.
+- Use `render.yaml` to keep deployments in sync.
 - Do not commit secret values to Git.

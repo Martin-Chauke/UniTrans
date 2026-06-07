@@ -8,3 +8,33 @@ services:
     buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
     startCommand: gunicorn unitrans.wsgi:application --bind 0.0.0.0:$PORT
     autoDeploy: true
+
+  - type: web_service
+    name: unitrans-manager-frontend
+    env: node
+    plan: starter
+    branch: main
+    root: frontend-manager
+    buildCommand: npm install && npm run build
+    startCommand: npm run start -- -p $PORT
+    autoDeploy: true
+
+  - type: web_service
+    name: unitrans-student-frontend
+    env: node
+    plan: starter
+    branch: main
+    root: frontend-student
+    buildCommand: npm install && npm run build
+    startCommand: npm run start -- -p $PORT
+    autoDeploy: true
+
+  - type: web_service
+    name: unitrans-driver-frontend
+    env: node
+    plan: starter
+    branch: main
+    root: frontend-driver
+    buildCommand: npm install && npm run build
+    startCommand: npm run start -- -p $PORT
+    autoDeploy: true
